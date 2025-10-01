@@ -31,6 +31,7 @@ import StaffScreen from "./screens/StaffScreen";
 import { SafeAreaView } from "react-native";
 import SalesScreen from "./screens/SalesScreen";
 import SettingsScreen from "./screens/SettingsScreen";
+import CustomerSearchScreen from "./screens/CustomerSearchScreen";
 
 const Stack = createStackNavigator();
 
@@ -61,21 +62,21 @@ const AppRoute: React.FC = () => {
         <Stack.Navigator>
           {/* {token && userData ? ( */}
           <>
-          <Stack.Screen
-            name="MainPage"
-            component={MainPage}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="SalesScreen"
-            component={SalesScreen}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="SettingsScreen"
-            component={SettingsScreen}
-            options={{ headerShown: false }}
-          />
+            <Stack.Screen
+              name="MainPage"
+              component={MainPage}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SalesScreen"
+              component={SalesScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SettingsScreen"
+              component={SettingsScreen}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="LoginScreen"
               component={LoginScreen}
@@ -113,12 +114,17 @@ const AppRoute: React.FC = () => {
             <Stack.Screen name="AddNew" component={AddNew} />
             <Stack.Screen name="AddCustomer" component={AddCustomer} />
             <Stack.Screen name="AddSuplier" component={AddSupplier} />
-            <Stack.Screen name="CustomerSelect" component={CustomerSelect} />
+            {/* <Stack.Screen name="CustomerSelect" component={CustomerSelect} /> */}
             <Stack.Screen name="Rapor" component={Rapor} />
             <Stack.Screen name="SaleProductList" component={SaleProductList} />
             <Stack.Screen
               name="ScrollableListScreen"
               component={ScrollableListScreen}
+            />
+            <Stack.Screen
+              name="CustomerSearchScreen"
+              component={CustomerSearchScreen}
+              options={{ headerShown: false }}
             />
           </>
         </Stack.Navigator>

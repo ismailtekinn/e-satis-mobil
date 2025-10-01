@@ -39,7 +39,10 @@ const SalesCard: React.FC<Props> = ({
   orderNumber,
   isSelected,
 }) => {
-  const { isCancelled, setIsCancelled } = useSalesCancel();
+  // const { isCancelled: isItemCancelled, setIsCancelled } = useSalesCancel();
+
+  const { isItemCancelled, toggleCancelled } = useSalesCancel();
+  const cancelled = isItemCancelled(product.Index);
   const total = (product.Stock ?? 0) * (product.Price ?? 0);
   const isSmall = screenWidth < 360; // küçük telefonlar
   const isLarge = screenWidth > 420; // büyük telefonlar
@@ -66,14 +69,15 @@ const SalesCard: React.FC<Props> = ({
 
   const renderRightActions = () => (
     <View style={styles.actionsContainer}>
+      {/* Etiket ile ilgili düzenleme butonu */}
       <Pressable
         style={({ pressed }) => [
           styles.actionButton,
           styles.editButton,
           pressed && styles.buttonPressed,
-          { backgroundColor: isCancelled ? "#ccc" : "#4CAF50" }, // pasif ise gri
+          { backgroundColor: cancelled ? "#ccc" : "#4CAF50" }, // pasif ise gri
         ]}
-        disabled={isCancelled}
+        disabled={cancelled}
         onPress={() => {
           if (isDiscountApplied) {
             Alert.alert(
@@ -81,8 +85,7 @@ const SalesCard: React.FC<Props> = ({
               "Dip isconto yapıldıktan sonra ürünler üzerinde değişiklik yapılamaz."
             );
             return; // burda return diyerek devamını engelle
-          }
-          if (!isCancelled) {
+          } else {
             setModalType("etiket");
             setModalVisible(true);
           }
@@ -92,18 +95,19 @@ const SalesCard: React.FC<Props> = ({
         <Ionicons
           name="pricetag"
           size={30}
-          color={isCancelled ? "#888" : "#fff"}
+          color={cancelled ? "#888" : "#fff"}
         />
       </Pressable>
+      {/* İsconto ile ilgili düzenleme butonu */}
 
       <Pressable
         style={({ pressed }) => [
           styles.actionButton,
           styles.editButton,
           pressed && styles.buttonPressed,
-          { backgroundColor: isCancelled ? "#ccc" : "#FFB74D" },
+          { backgroundColor: cancelled ? "#ccc" : "#FFB74D" },
         ]}
-        disabled={isCancelled}
+        disabled={cancelled}
         onPress={() => {
           if (isDiscountApplied) {
             Alert.alert(
@@ -111,8 +115,7 @@ const SalesCard: React.FC<Props> = ({
               "Dip isconto yapıldıktan sonra ürünler üzerinde değişiklik yapılamaz."
             );
             return; // burda return diyerek devamını engelle
-          }
-          if (!isCancelled) {
+          } else {
             setModalType("isconto");
             setModalData({
               type: "isconto",
@@ -124,24 +127,38 @@ const SalesCard: React.FC<Props> = ({
             });
             setModalVisible(true);
           }
+          // if (!isItemCancelled) {
+          //   setModalType("isconto");
+          //   setModalData({
+          //     type: "isconto",
+          //     data: {
+          //       itemId: product.Index,
+          //       price: product.Price,
+          //       currentIsconto: product.Isconto ?? "",
+          //     },
+          //   });
+          //   setModalVisible(true);
+          // }
         }}
         android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: false }}
       >
         <MaterialIcons
           name="percent"
           size={30}
-          color={isCancelled ? "#888" : "#fff"}
+          color={cancelled ? "#888" : "#fff"}
         />
       </Pressable>
+
+      {/* Edit düzenleme butonu */}
 
       <Pressable
         style={({ pressed }) => [
           styles.actionButton,
           styles.editButton,
           pressed && styles.buttonPressed,
-          { backgroundColor: isCancelled ? "#ccc" : "#2196F3" },
+          { backgroundColor: cancelled ? "#ccc" : "#2196F3" },
         ]}
-        disabled={isCancelled}
+        disabled={cancelled}
         onPress={() => {
           if (isDiscountApplied) {
             Alert.alert(
@@ -149,8 +166,7 @@ const SalesCard: React.FC<Props> = ({
               "Dip isconto yapıldıktan sonra ürünler üzerinde değişiklik yapılamaz."
             );
             return; // burda return diyerek devamını engelle
-          }
-          if (!isCancelled) {
+          } else {
             setModalType("edit");
             setModalData({
               type: "edit",
@@ -163,13 +179,26 @@ const SalesCard: React.FC<Props> = ({
             );
             setModalVisible(true);
           }
+          // if (!isItemCancelled) {
+          //   setModalType("edit");
+          //   setModalData({
+          //     type: "edit",
+          //     data: { itemId: product.Index, initialCount: product.Stock },
+          //   });
+          //   setSelectedSales(
+          //     selectedSale.map((p) =>
+          //       p.Barcode === product.Barcode ? new SaleItemDeneme({ ...p }) : p
+          //     )
+          //   );
+          //   setModalVisible(true);
+          // }
         }}
         android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: false }}
       >
         <Ionicons
           name="create-outline"
           size={30}
-          color={isCancelled ? "#888" : "#fff"}
+          color={cancelled ? "#888" : "#fff"}
         />
       </Pressable>
 
@@ -195,7 +224,7 @@ const SalesCard: React.FC<Props> = ({
             data: {
               itemId: product.Index,
               initialCount: product.Stock,
-              isCancelled: isCancelled,
+              isCancelled: isItemCancelled,
             },
           });
           setModalVisible(true);
@@ -227,7 +256,7 @@ const SalesCard: React.FC<Props> = ({
             },
           ]}
         >
-          {isCancelled && (
+          {cancelled && (
             <View style={styles.cancelOverlay}>
               <Text style={styles.cancelText}>İPTAL EDİLDİ</Text>
             </View>
@@ -352,17 +381,29 @@ const SalesCard: React.FC<Props> = ({
             swipeableRef.current?.close();
           }}
           // onDelete={() => setIsCancelled(true)}
-          onDelete={() => setIsCancelled((prev) => !prev)}
+          // onDelete={() => setIsCancelled((prev) => !prev)}
+          onDelete={(itemId) => {
+            setSelectedSales((prev) =>
+              prev.map((p) =>
+                p.Index === itemId ? { ...p, isCanceled: true } : p
+              )
+            );
+          }}
           data={
             modalType === "edit"
               ? { itemId: product.Index, initialCount: product.Stock }
               : modalType === "isconto"
-              ? { itemId: product.Index, price: product.Tutar.toFixed(2) }
+              ? {
+                  itemId: product.Index,
+                  price: product.Tutar.toFixed(2),
+                  indirimTutar: product.IndTutar ?? 0,
+                  indirimOran: product.IndOran ?? 0,
+                }
               : modalType === "delete"
               ? {
                   itemId: product.Index,
                   price: product.Tutar.toFixed(2),
-                  isCancelled: isCancelled,
+                  isCancelled: isItemCancelled,
                 }
               : undefined
           }

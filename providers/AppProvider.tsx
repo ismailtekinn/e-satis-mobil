@@ -1,11 +1,20 @@
 import React from "react";
 import { AlertProvider, useAlert } from "../contex/AlertContext";
 import AlertModal from "../component/AlertModal";
+import { SelectedCustomerProvider } from "../contex/selectedCustomerContex";
+import { AddCustomerFormProvider } from "../contex/customer/addCustomerFormContext";
+import { BussinessProvider } from "../contex/addCustomerModal/bussinessContext";
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AlertProvider>
-      <AppInner>{children}</AppInner>
+      {/* <BussinessProvider> */}
+        <AddCustomerFormProvider>
+          <SelectedCustomerProvider>
+            <AppInner>{children}</AppInner>
+          </SelectedCustomerProvider>
+        </AddCustomerFormProvider>
+      {/* </BussinessProvider> */}
     </AlertProvider>
   );
 };

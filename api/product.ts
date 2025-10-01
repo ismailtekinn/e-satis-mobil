@@ -3,7 +3,7 @@ import {
   ProductDataItem,
   SearchProductResponse,
   SQLDataParsed,
-} from "../types/api/searchProduct";
+} from "../types/apiresponse/searchProduct";
 import {
   Product,
   SearchProductFields,
@@ -158,9 +158,6 @@ export async function updateProduct(params: UpdateProduct) {
 export async function searchProduct( // Fonksiyon tanımı
   params: SearchProductFields // Parametre tipini al
 ): Promise<ProductDataItem[]> {
-
-  console.log("param console yazdırılıyor: ", params); // Parametreyi yazdır
-
   try {
     const url = API_URL101 + "TriaRestEczane/UrunAra"; // API URL
     const response = await fetch(url, {
@@ -186,7 +183,7 @@ export async function searchProduct( // Fonksiyon tanımı
       ""
     ); // Kontrol karakter temizle
     const parsedData: SQLDataParsed = JSON.parse(cleanSQLData); // JSON parse et
-
+    console.log("Toplam kayıt sayısı:", parsedData.RECORD_COUNT);
     return parsedData.DATA; // DATA dizisini dön
   } catch (error) {
     // Hata yakalama

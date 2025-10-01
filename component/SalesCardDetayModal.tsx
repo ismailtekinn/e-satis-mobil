@@ -27,14 +27,15 @@ interface ActionModalProps {
   type: ActionType;
   data?: any;
   onConfirm?: (data: { type: ActionType; value?: any }) => void;
-  onDelete?: () => void;
+  // onDelete?: () => void;
+  onDelete?: (itemId: number) => void;
 }
 interface IscontoForm {
   // iscontoType: "Yüzdesel" | "Tutarsal" | "Alınacak Tutar";
-  inputValue: string; // Kullanıcının girdiği değer
-  iscontoOran: number; // % değer, Yüzdesel ise inputValue, diğerleri için 0
-  iscontoTutar: number; // Hesaplanan iskonto tutarı
-  urunTutar: number; // Katılım payı - iskonto tutarı
+  inputValue: string;
+  iscontoOran: number;
+  iscontoTutar: number;
+  urunTutar: number;
 }
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -47,6 +48,8 @@ const ActionModal: React.FC<ActionModalProps> = ({
   onDelete,
 }) => {
   const { selectedSale, setSelectedSales, summary, setSummary } = useSales();
+  // const { isCancelled, setIsCancelled } = useSalesCancel();
+  const { isItemCancelled, toggleCancelled } = useSalesCancel();
 
   const initialCount = data?.initialCount ?? 1;
 
@@ -59,7 +62,13 @@ const ActionModal: React.FC<ActionModalProps> = ({
   const [selectedIscontoType, setSelectedIscontoType] = useState("Yüzdesel"); // varsayılan seçenek
   const dropdownOptions = ["Yüzdesel", "Tutarsal", "Alınacak Tutar"];
 
-  const { isDiscountApplied, setIsDiscountApplied } = useSalesCancel();
+  const {
+    isDiscountApplied,
+    setIsDiscountApplied,
+    isIscontoApplied,
+    setIscontoApplied,
+  } = useSalesCancel();
+
   const handleConfirm = () => {
     if (count <= 0) {
       setAlertMessage("Adet miktarı 0 ve altında olamaz");
@@ -121,7 +130,39 @@ const ActionModal: React.FC<ActionModalProps> = ({
     resetForm();
   };
 
-  const handleIscontoCancel = () => {
+  const applyToggleCancelAndTotals = (itemId: number) => {
+    // 1) İlgili ürünü bul
+    const item = selectedSale.find((p) => p.Index === itemId);
+    if (!item) return;
+
+    // 2) Satır etkisi: (ürün içi ind. varsa düş)
+    const lineBase = (item.Price || 0) * (item.Stock || 0);
+    const lineEffect = lineBase - (item.IndTutar || 0);
+
+    // 3) Şu anki iptal durumu ve sonraki durum
+    const currentlyCancelled = isItemCancelled(itemId);
+    const willBeCancelled = !currentlyCancelled;
+
+    // 4) İptal durumunu değiştir
+    toggleCancelled(itemId);
+
+    // 5) Özetleri delta ile güncelle
+    setSummary((prev) => {
+      const newTotalPrice = willBeCancelled
+        ? prev.totalPrice - lineEffect // iptal -> düş
+        : prev.totalPrice + lineEffect; // geri al -> ekle
+
+      const indTutar = prev.IndTutar || 0;
+      const newUrunTutar = Math.max(0, newTotalPrice - indTutar);
+
+      return {
+        ...prev,
+        totalPrice: newTotalPrice,
+        UrunTutar: indTutar > 0 ? newUrunTutar : newTotalPrice,
+      };
+    });
+  };
+  const handleDipIscontoCancel = () => {
     onClose();
     setIsDiscountApplied(false);
     setSummary((prev) => ({
@@ -134,9 +175,33 @@ const ActionModal: React.FC<ActionModalProps> = ({
     }));
   };
 
+  const handleIscontoCancel = () => {
+    onClose();
+    setIscontoApplied(false);
+    const updated = selectedSale.map((p) =>
+      p.Index === data.itemId
+        ? {
+            ...p,
+            Isconto: undefined,
+            IndFlag: undefined,
+            IndOran: 0,
+            IndTutar: 0,
+          }
+        : p
+    );
+    setSelectedSales(updated);
+    const newTotalPrice = updated.reduce((sum, item) => {
+      const itemPrice = (item.Price || 0) * (item.Stock || 1);
+      return sum + itemPrice;
+    }, 0);
+    setSummary((prev) => ({
+      ...prev,
+      totalPrice: newTotalPrice,
+    }));
+  };
+
   const handleIscontoConfirm = () => {
     const value = parseFloat(iscontoForm.inputValue);
-
     // Boş veya NaN kontrolü
     if (!iscontoForm.inputValue || isNaN(value)) {
       setAlertMessage("İndirim değeri boş olamaz");
@@ -159,7 +224,7 @@ const ActionModal: React.FC<ActionModalProps> = ({
       resetForm();
       return;
     }
-    if (selectedIscontoType === "Tutarsal" && value <= katilimPayi) {
+    if (selectedIscontoType === "Tutarsal" && value >= katilimPayi) {
       setAlertMessage("İndirim miktarı tutara eşit ve üzerinde olamaz");
       setAlertModalVisible(true);
       resetForm();
@@ -200,7 +265,7 @@ const ActionModal: React.FC<ActionModalProps> = ({
       ...prev,
       totalPrice: newTotalPrice,
     }));
-
+    onClose();
     resetForm();
   };
   useEffect(() => {
@@ -310,7 +375,13 @@ const ActionModal: React.FC<ActionModalProps> = ({
               <TouchableOpacity
                 style={[styles.button, styles.confirm]}
                 onPress={() => {
-                  onDelete?.(); // Silme veya geri alma burada tetikleniyor
+                  const id = data?.itemId;
+                  if (typeof id === "number") {
+                    // onDelete?.(id);
+                    // toggleCancelled(id);
+                    applyToggleCancelAndTotals(id);
+                  }
+
                   onClose();
                 }}
               >
@@ -348,7 +419,22 @@ const ActionModal: React.FC<ActionModalProps> = ({
           <View style={styles.caseContainer}>
             {/* Başlık */}
             <Text style={styles.iscontoBaslik}>KATILIM PAYI</Text>
-
+            {data?.indirimTutar > 0 && (
+              <View style={styles.iscontoCancelContainer}>
+                <Text style={styles.iscontoCancelText}>
+                  Önceki İskonto : {data.indirimTutar.toFixed(2)} TL • %
+                  {data.indirimOran && isFinite(data.indirimOran)
+                    ? data.indirimOran
+                    : 0}
+                </Text>
+                <TouchableOpacity
+                  style={styles.iscontoCancelButton}
+                  onPress={handleIscontoCancel}
+                >
+                  <Text style={styles.iscontoCancelButtonText}>İptal</Text>
+                </TouchableOpacity>
+              </View>
+            )}
             <View
               style={{
                 flexDirection: "row",
@@ -441,7 +527,11 @@ const ActionModal: React.FC<ActionModalProps> = ({
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.button, styles.confirm]}
-                onPress={handleIscontoConfirm}
+                onPress={() => {
+                  Keyboard.dismiss(); // klavyeyi kapatır
+                  handleIscontoConfirm(); // senin fonksiyonun
+                  setIscontoApplied(true);
+                }}
               >
                 <Text style={styles.buttonText}>Kaydet</Text>
               </TouchableOpacity>
@@ -453,7 +543,22 @@ const ActionModal: React.FC<ActionModalProps> = ({
           <View style={styles.caseContainer}>
             {/* Başlık */}
             <Text style={styles.iscontoBaslik}>Dip İskonto</Text>
-
+            {(summary?.IndTutar ?? 0) > 0 && (
+              <View style={styles.iscontoCancelContainer}>
+                <Text style={styles.iscontoCancelText}>
+                  Önceki İskonto : {(summary?.IndTutar ?? 0).toFixed(2)} TL • %
+                  {summary?.IndOran && isFinite(summary?.IndOran)
+                    ? summary.IndOran
+                    : 0}
+                </Text>
+                <TouchableOpacity
+                  style={styles.iscontoCancelButton}
+                  onPress={handleDipIscontoCancel}
+                >
+                  <Text style={styles.iscontoCancelButtonText}>İptal</Text>
+                </TouchableOpacity>
+              </View>
+            )}
             <View
               style={{
                 flexDirection: "row",
@@ -486,21 +591,9 @@ const ActionModal: React.FC<ActionModalProps> = ({
                 </TouchableOpacity>
               ))}
             </View>
+            {/* TUTAR BURDA CONSOLE YAZDIRILIYOR:  */}
             <Text style={styles.iscontoTutarAna}>{katilimPayi} TL</Text>
-            {(summary?.IndTutar ?? 0) > 0 && (
-              <View style={styles.iscontoCancelContainer}>
-                <Text style={styles.iscontoCancelText}>
-                  İlgili İskonto: {(summary?.IndTutar ?? 0).toFixed(2)} TL • %
-                  {summary?.IndOran ?? 0}
-                </Text>
-                <TouchableOpacity
-                  style={styles.iscontoCancelButton}
-                  onPress={handleIscontoCancel}
-                >
-                  <Text style={styles.iscontoCancelButtonText}>İptal</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+
             <View style={styles.iscontoSatir}>
               <Text style={styles.iscontoEtiket}>İskonto Tipi</Text>
               <Text style={styles.iscontoDropdownText}>
@@ -562,6 +655,12 @@ const ActionModal: React.FC<ActionModalProps> = ({
               <TouchableOpacity
                 style={[styles.button, styles.confirm]}
                 onPress={() => {
+                  // if ((summary?.IndTutar ?? 0) === 0) {
+                  //   setAlertMessage("Tutar değeri 0 iken işlem yapamazsınız.");
+                  //   setAlertModalVisible(true);
+                  //   return; // ❌
+                  // }
+
                   Keyboard.dismiss();
                   handleTutarConfirm();
                   setIsDiscountApplied(true);

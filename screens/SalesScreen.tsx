@@ -22,23 +22,23 @@ import BarCodeScanResult from "./BarcodeScannerPage";
 import { LinearGradient } from "expo-linear-gradient";
 import SalesCard from "../component/SalesCard";
 import { SaleItemDeneme, SaleProduct } from "../types/saleType";
-import OnScreenKeyboard from "../component/OnScreenKeyboard";
-import VirtualKeyboard from "react-native-virtual-keyboard";
-import CustomKeyboard from "../component/PinKeyboard";
 import SaleScreenModal from "../component/SaleScreenModal";
-import CustomerSelectModal from "../component/CustomerSelectModal";
+// import CustomerSelectModal from "../component/CustomerSelectModal";
 import { SelectedCustomer } from "../types/customerType";
-import ActionModalExample from "../component/ActionModalExample";
 import { ModalType } from "../types/modalType";
 import BaseModalManager from "../component/BaseModalManager";
 import { useFileType } from "../contex/fileTypeContext";
 import { useSales } from "../contex/SalesContext";
 import SalesScreenSummaryBox from "../component/SalesScreenSummaryBox";
 import { searchProduct } from "../api/product";
-import { ProductDataItem, SQLDataParsed } from "../types/api/searchProduct";
+import { ProductDataItem, SQLDataParsed } from "../types/apiresponse/searchProduct";
 import SalesScreenSearchArea from "../component/SalesScreenSearchArea";
 import { SearchProductFields } from "../types/productType";
 import { useSalesCancel } from "../contex/salesCancelContext";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../types";
+import { useSelectedCustomer } from "../contex/selectedCustomerContex";
 
 export const sampleSalesDeneme: SaleItemDeneme[] = [
   new SaleItemDeneme({
@@ -72,145 +72,6 @@ export const sampleSalesDeneme: SaleItemDeneme[] = [
     Currency: "TL",
   }),
 ];
-// export const sampleSalesDeneme: SaleItemDeneme[] = [
-//   {
-//     Index: 1,
-//     ProductName: "KATILIM PAYI",
-//     Barcode: 2222,
-//     Stock: 1,
-//     Price: 0.01,
-//     VatRate: 10,
-//     Rayon: "Reyon 1",
-//     Currency: "TL",
-//   },
-//   {
-//     Index: 2,
-//     ProductName: "FİYAT FARKI",
-//     Barcode: 3333,
-//     Stock: 1,
-//     Price: 0.01,
-//     VatRate: 10,
-//     Rayon: "Reyon 2",
-//     Currency: "TL",
-//   },
-//   {
-//     Index: 3,
-//     ProductName: "İLAÇ %1",
-//     Barcode: 7777,
-//     Stock: 1,
-//     Price: 0.01,
-//     VatRate: 1,
-//     Rayon: "Reyon 3",
-//     Currency: "TL",
-//   },
-// ];
-
-// export const sampleProductsDeneme: SaleItemDeneme[] = [
-//   {
-//     Index: 1,
-//     ProductName: "Parol 500mg 20 Tablet",
-//     Barcode: 1234567890123,
-//     Stock: 25,
-//     Price: 14900.99,
-//     VatRate: 18,
-//     Rayon: "Reyon 1",
-//     Currency: "TL",
-//     Isconto: "",
-//   },
-//   {
-//     Index: 2,
-//     ProductName: "Augmentin 1000mg 14 Tablet",
-//     Barcode: 2345678901234,
-//     Stock: 12,
-//     Price: 790000.5,
-//     VatRate: 8,
-//     Rayon: "Reyon 2",
-//     Currency: "TL",
-//     Isconto: "",
-//   },
-//   {
-//     Index: 3,
-//     ProductName: "Aspirin Protect 100mg 30 Tablet",
-//     Barcode: 3456789012345,
-//     Stock: 7,
-//     Price: 120.0,
-//     VatRate: 1,
-//     Rayon: "Reyon 3",
-//     Currency: "TL",
-//     Isconto: "",
-//   },
-//   {
-//     Index: 4,
-//     ProductName: "Majezik 100mg 15 Tablet",
-//     Barcode: 4567890123456,
-//     Stock: 30,
-//     Price: 35.75,
-//     VatRate: 18,
-//     Rayon: "Reyon 1",
-//     Currency: "TL",
-//     Isconto: "",
-//   },
-//   {
-//     Index: 5,
-//     UrunId:15,
-//     UrunTipi:0,
-//     DepartmanNo:1,
-//     Birim:"AD",
-//     Adet : 2,
-//     BirimFiyat:150,
-//     Tutar:300,
-//     IndFlag:0, //0 Yüzdelik 1 Tutarsal 2  Alınacak Tutar
-//     IndOran:0,
-//     IndTutar:0,
-//     SaticiNo:1,
-//     Puan:0,
-//     KasiyerNo:1,
-//     UrunKartiFiyati:0,
-//     UpdateDate:"2025-09-15 18:33",
-//     QrCode:"01011112121212",
-//     SeriNo:"",
-//     Miad:"2025-07-31",
-//     PartiNo:"2121",
-//     DipIskonto:0,
-//     DipArttirim:0,
-//     FiyatNo:1,
-//     UtsLi:0,
-//     UtsLotNo:"",
-//     UtsSeriNo:"",
-//     UtsUrunNo:"",
-//     UtsEssizKimlikNo:"",
-//     ProductName: "Vermidon 500mg 20 Tablet",
-//     Barcode: 5678901234567,
-//     Stock: 0,
-//     Price: 15.0,
-//     VatRate: 8,
-//     Rayon: "Reyon 4",
-//     Currency: "TL",
-//     Isconto: "",
-//   },
-//   {
-//     Index: 6,
-//     ProductName: "Vermidon 500mg 20 Tablet",
-//     Barcode: 5678901234567,
-//     Stock: 0,
-//     Price: 15.0,
-//     VatRate: 8,
-//     Rayon: "Reyon 4",
-//     Currency: "TL",
-//     Isconto: "",
-//   },
-//   {
-//     Index: 7,
-//     ProductName: "Vermidon 500mg 20 Tablet",
-//     Barcode: 5678901234567,
-//     Stock: 0,
-//     Price: 15.0,
-//     VatRate: 8,
-//     Rayon: "Reyon 4",
-//     Currency: "TL",
-//     Isconto: "",
-//   },
-// ];
 export const sampleProductsDeneme: SaleItemDeneme[] = [
   new SaleItemDeneme({
     Index: 1,
@@ -316,14 +177,20 @@ const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
 
 const SalesScreen = () => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
+  const PAGE_SIZE = 100;
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [searchData, setSearchData] = useState<SearchProductFields>({
     Aranan: searchText,
     AramaTipi: 0,
+    Baslangic: 0,
+    Adet: PAGE_SIZE,
   });
   const [searchQuantity, setSearchQuantity] = useState<number>(1);
-  // const [searchProducts, setSearchProducts] = useState(sampleProductsDeneme);
   // const [searchProducts, setSearchProducts] = useState(sampleProductsDeneme);
   const [searchProducts, setSearchProducts] = useState<SaleItemDeneme[]>([]);
 
@@ -333,6 +200,8 @@ const SalesScreen = () => {
   // const [selectedSale, setSelectedSales] =
   //   useState<SaleItemDeneme[]>(sampleProductsDeneme);
   const { selectedSale, setSelectedSales, summary, setSummary } = useSales();
+    const { selectedCustomer, setSelectedCustomer } = useSelectedCustomer();
+  
   const [selectedIndex, setSelectedIndex] = useState<number | null>(
     selectedSale.length > 0 ? selectedSale.length - 1 : null
   );
@@ -342,14 +211,11 @@ const SalesScreen = () => {
   const [searchBoxHeight, setSearchBoxHeight] = useState(0);
   const [saleModalVisible, setSaleModalVisible] = useState(false);
   const [customerModalVisible, setCustomerModalVisible] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer>();
-
+  // const [selectedCustomer, setSelectedCustomer] = useState<SelectedCustomer>();
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const { selectedFileType, setSelectedFileType } = useFileType();
-
   const { isDiscountApplied } = useSalesCancel();
-
   const KEYBOARD_HEIGHT = screenHeight * 0.3;
   const ITEM_HEIGHT = 500;
   const MAX_HEIGHT = 500;
@@ -381,7 +247,6 @@ const SalesScreen = () => {
   //   });
   //   setSearchText("");
   // };
-
   const handleSelectProduct = (item: SaleItemDeneme) => {
     const newItem = new SaleItemDeneme({
       ...item,
@@ -406,17 +271,21 @@ const SalesScreen = () => {
       const searchPayload = {
         ...searchData,
         AramaTipi: isNumber ? 1 : 0,
-        Aranan: searchValue, // sadece ürün kodu aranacak
+        Aranan: searchValue,
+        Baslangic: currentPage * (searchData.Adet || 100),
+        Adet: searchData.Adet || 100,
       };
+
       setSearchQuantity(quantity);
       const response: ProductDataItem[] = await searchProduct(searchPayload);
       if (response) {
         setLoading(false);
       }
+      const startIndex = searchProducts.length;
       const saleItems: SaleItemDeneme[] = response.map(
         (item, index) =>
           new SaleItemDeneme({
-            Index: index + 1,
+            Index: startIndex + index + 1,
             ProductName: item.MAL_ADI,
             Barcode: Number(item.BARKOD),
             Stock: Math.abs(Number(item.BAKIYE)),
@@ -428,25 +297,39 @@ const SalesScreen = () => {
             UrunId: Number(item.ID),
           })
       );
-      setSearchProducts(saleItems);
+      // setSearchProducts(saleItems);
+      setSearchProducts((prev) =>
+        currentPage === 0 ? saleItems : [...prev, ...saleItems]
+      );
+      setHasMore(saleItems.length > 0);
+      setLoading(false);
+      setCurrentPage((prev) => prev + 1);
+
+      if (saleItems.length < (searchData.Adet || 100)) setHasMore(false);
     } catch (error: any) {
       console.error("Arama hatası: ", error);
     }
   };
 
-  useEffect(() => {
-    if (selectedSale.length > 0) {
-      const lastIndex = selectedSale.length - 1;
-      setSelectedIndex(lastIndex); // Son eklenen öğeyi seçili yap
-      if (flatListRef.current) {
-        flatListRef.current.scrollToEnd({ animated: true }); // Scroll'u sonuna getir
-      }
-    }
-  }, [selectedSale]);
+  // useEffect(() => {
+  //   if (selectedSale.length > 0) {
+  //     const lastIndex = selectedSale.length - 1;
+  //     setSelectedIndex(lastIndex); // Son eklenen öğeyi seçili yap
+  //     if (flatListRef.current) {
+  //       flatListRef.current.scrollToEnd({ animated: true }); // Scroll'u sonuna getir
+  //     }
+  //   }
+  // }, [selectedSale]);
 
   useEffect(() => {
     handleSearch();
   }, [searchData]);
+
+  useEffect(() => {
+    if (selectedSale.length > 0) {
+      setSelectedIndex(selectedSale.length - 1);
+    }
+  }, [selectedSale]);
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", () =>
       setKeyboardVisible(true)
@@ -496,7 +379,11 @@ const SalesScreen = () => {
 
           <TouchableOpacity
             style={styles.selectCustomerBtn}
-            onPress={() => setCustomerModalVisible(true)}
+            // onPress={() => {
+            //   setCustomerModalVisible(true);
+            //   navigation.navigate("CustomerSearchScreen");
+            // }}
+            onPress={() => navigation.navigate("CustomerSearchScreen")}
           >
             <Text style={styles.selectCustomerBtnText}>Müşteri Seç</Text>
           </TouchableOpacity>
@@ -526,6 +413,8 @@ const SalesScreen = () => {
                   ...prev,
                   Aranan: text.toLocaleUpperCase(),
                 }));
+                setCurrentPage(0);
+                setSearchProducts([]);
               }}
             />
 
@@ -542,40 +431,49 @@ const SalesScreen = () => {
               </TouchableOpacity>
             )}
           </View>
-          {searchData.Aranan.trim() && (
-            <View
-              style={[
-                styles.newSection,
-                {
-                  top: searchBoxY + searchBoxHeight,
-                  maxHeight: newSectionMaxHeight,
-                },
-              ]}
-            >
-              {searchData.Aranan.trim().length < 3 ? (
-                <View style={{ padding: 20, alignItems: "center" }}>
-                  <Text style={styles.noDataText}>
-                    Lütfen en az 3 karakter giriniz
-                  </Text>
-                </View>
-              ) : loading ? (
-                <View style={{ padding: 20, alignItems: "center" }}>
-                  <ActivityIndicator size="large" color="#007AFF" />
-                  <Text>Ürünler yükleniyor...</Text>
-                </View>
-              ) : searchProducts.length > 0 ? (
+          <View
+            style={[
+              styles.newSection,
+              {
+                top: searchBoxY + searchBoxHeight,
+                maxHeight: newSectionMaxHeight,
+                display: searchData.Aranan.trim() ? "flex" : "none", // görünürlüğü kontrol ediyoruz
+              },
+            ]}
+          >
+            {searchData.Aranan.trim().length < 3 && (
+              <View style={{ padding: 20, alignItems: "center" }}>
+                <Text style={styles.noDataText}>
+                  Lütfen en az 3 karakter giriniz
+                </Text>
+              </View>
+            )}
+
+            {searchData.Aranan.trim().length >= 3 && (
+              <>
                 <SalesScreenSearchArea
                   searchProducts={searchProducts} // Tek ürünü array olarak gönder
                   handleSelectProduct={handleSelectProduct}
                   dynamicHeight={newSectionMaxHeight} // her satırın yüksekliği
                   onCloseModal={closeSearchModal}
+                  loading={loading}
+                  hasMore={hasMore}
+                  onLoadMore={handleSearch}
                 />
-              ) : (
-                <Text style={styles.noDataText}>Ürün bulunamadı</Text>
-              )}
-            </View>
-          )}
 
+                {loading && (
+                  <View style={{ padding: 20, alignItems: "center" }}>
+                    <ActivityIndicator size="large" color="#007AFF" />
+                    <Text>Ürünler yükleniyor...</Text>
+                  </View>
+                )}
+
+                {!loading && searchProducts.length === 0 && (
+                  <Text style={styles.noDataText}>Ürün bulunamadı</Text>
+                )}
+              </>
+            )}
+          </View>
           <TouchableOpacity
             style={styles.barcodeBtn}
             onPress={() => setIsScannerVisible(true)}
@@ -622,7 +520,6 @@ const SalesScreen = () => {
         </View>
 
         {/* sağdaki menü butonların ayarlandığı kısım */}
-
         <View
           style={[
             styles.fabContainer,
@@ -696,35 +593,6 @@ const SalesScreen = () => {
             </TouchableOpacity>
           </ScrollView>
         </View>
-        {/* Menü işlem modalı */}
-        <Modal
-          visible={isMenuModalVisible}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setIsMenuModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Menü</Text>
-              <TouchableOpacity style={styles.menuItem}>
-                <Text style={styles.menuText}>Menü 1</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.menuItem}>
-                <Text style={styles.menuText}>Menü 2</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.menuItem}>
-                <Text style={styles.menuText}>Menü 3</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.closeBtn}
-                onPress={() => setIsMenuModalVisible(false)}
-              >
-                <Text style={styles.closeBtnText}>Kapat</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
         {/* Klavye componentinin eklendiği kısım */}
         {/* <View style={{ position: "absolute", left: 0, right: 0, bottom: 0 }}>
           <OnScreenKeyboard
@@ -738,48 +606,18 @@ const SalesScreen = () => {
           visible={saleModalVisible}
           onClose={() => setSaleModalVisible(false)}
         />
-        <CustomerSelectModal
+        {/* <CustomerSelectModal
           visible={customerModalVisible}
           onClose={() => setCustomerModalVisible(false)}
           onSelect={(customer: SelectedCustomer) =>
             setSelectedCustomer(customer)
           }
-        />
+        /> */}
         <BaseModalManager
           type={activeModal}
           visible={activeModal !== null}
           onClose={() => setActiveModal(null)}
         />
-
-        {/* <View style={styles.summaryBox}>
-          <View style={styles.summaryRow}>
-            <View style={styles.leftColumn}>
-              <View style={styles.summaryItemLeft}>
-                <Text style={styles.summaryLabel}>Ürün Çeşidi</Text>
-                <Text style={styles.summaryValue}>{summary.totalItems}</Text>
-              </View>
-
-              <View style={styles.summaryItemLeft}>
-                <Text style={styles.summaryLabel}>İskonto</Text>
-                <Text style={styles.summaryValue}> {discountText}</Text>
-              </View>
-              <View style={styles.summaryItemLeft}>
-                <Text style={styles.summaryLabel}>Toplam Adet</Text>
-                <Text style={styles.summaryValue}>{summary.totalStock}</Text>
-              </View>
-            </View>
-            <View style={styles.verticalDivider} />
-            <View style={styles.rightColumn}>
-              <Text style={styles.generalTotalValue}>
-                ₺
-                {summary.totalPrice.toLocaleString("tr-TR", {
-                  minimumFractionDigits: 2,
-                })}
-              </Text>
-            </View>
-          </View>
-        </View> */}
-
         <View style={styles.summaryContainer}>
           <SalesScreenSummaryBox />
         </View>

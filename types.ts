@@ -42,6 +42,7 @@ export type RootStackParamList = {
   ProductListScreen: {categoryId:number,categoryName:string};
   BasketCardScreen: undefined;
   StaffScreen: undefined;
+  CustomerSearchScreen:undefined;
 
 };
 

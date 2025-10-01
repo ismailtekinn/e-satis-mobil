@@ -1,5 +1,11 @@
 import { API_URL } from "../constants/constant";
-import { Customer } from "../types/customerType";
+import {
+  ApiResponse,
+  CustomerItem,
+  SQLDataResponse,
+} from "../types/apiresponse/searchCustomers";
+import { Customer, SearchCustomerFields } from "../types/customerType";
+import { fetchSqlData } from "./generic";
 
 export async function addCustomer(
   params: Customer
@@ -50,5 +56,46 @@ export async function customerList(userID: number) {
   } catch (error) {
     console.error("Bir hata oluştu:", error);
     throw new Error("Müşteriler getirilirken bir hata oluştu.");
+  }
+}
+
+export async function searchCustomers(
+  params: Partial<SearchCustomerFields>
+): Promise<SQLDataResponse> {
+  try {
+    const url = "http://94.54.83.21:8082/TriaRestEczane/MusteriSorgula";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+      mode: "cors",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Müşteri sorgulama başarısız oldu.");
+    }
+
+    const apiResponse: ApiResponse = await response.json();
+
+    if (!apiResponse.SQL_Data) {
+      throw new Error("SQL_Data alanı boş döndü.");
+    }
+
+    // SQL_Data stringini parse et
+    const sqlData: SQLDataResponse = JSON.parse(apiResponse.SQL_Data);
+    sqlData.DATA = sqlData.DATA.map((item) => ({
+      ...item,
+    }));
+
+    return sqlData;
+  } catch (error: any) {
+    console.error("Müşteri sorgulama hatası:", error);
+    throw new Error(
+      error.message || "Müşteri sorgulama sırasında bir hata oluştu."
+    );
   }
 }

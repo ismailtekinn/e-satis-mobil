@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   FlatList,
   View,
@@ -20,16 +20,28 @@ type SalesScreenSearchAreaProps = {
   handleSelectProduct: (item: SaleItemDeneme) => void;
   dynamicHeight: number;
   onCloseModal?: () => void;
+  loading?: boolean; // Şu anda veri yükleniyor mu
+  hasMore?: boolean; // Daha fazla veri var mı
+  onLoadMore?: () => void;
 };
-
 const SalesScreenSearchArea: React.FC<SalesScreenSearchAreaProps> = ({
   searchProducts,
   handleSelectProduct,
   dynamicHeight,
   onCloseModal,
+  loading,
+  hasMore,
+  onLoadMore,
 }) => {
   const { isDiscountApplied, setIsDiscountApplied } = useSalesCancel();
-  const {alertModalVisible, setAlertModalVisible,alertMessage, setAlertMessage} = useAlert();
+  const {
+    alertModalVisible,
+    setAlertModalVisible,
+    alertMessage,
+    setAlertMessage,
+  } = useAlert();
+  const flatListRef = useRef<FlatList<SaleItemDeneme>>(null);
+  const [contentHeight, setContentHeight] = useState(0);
 
   const renderItem: ListRenderItem<SaleItemDeneme> = ({ item }) => (
     <View style={styles.customerItem}>
@@ -151,11 +163,20 @@ const SalesScreenSearchArea: React.FC<SalesScreenSearchAreaProps> = ({
   return (
     <FlatList
       data={searchProducts}
-      keyExtractor={(item) => item.Index.toString()}
+      keyExtractor={(item) => `${item.UrunId}-${Date.now()}-${Math.random()}`}
       renderItem={renderItem}
       style={{ maxHeight: dynamicHeight }}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      onEndReached={() => {
+        if (!loading && hasMore) {
+          onLoadMore?.(); // parent'tan gelen method çağrılıyor
+        }
+      }}
+      onEndReachedThreshold={0.3}
+      maintainVisibleContentPosition={{
+        minIndexForVisible: 0,
+      }}
     />
   );
 };
