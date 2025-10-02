@@ -4,7 +4,7 @@ import {
   CustomerItem,
   SQLDataResponse,
 } from "../types/apiresponse/searchCustomers";
-import { Customer, SearchCustomerFields } from "../types/customerType";
+import { AddCustomerFormTypeDeneme, Customer, SearchCustomerFields } from "../types/customerType";
 import { fetchSqlData } from "./generic";
 
 export async function addCustomer(
@@ -99,3 +99,41 @@ export async function searchCustomers(
     );
   }
 }
+// export async function createUpdateCustomer(params: Partial<AddCustomerFormTypeDeneme>): Promise<> {
+//   try {
+//     const url = `${API_URL}TriaRestEczane//CariEkleGuncelle`;
+
+//     const response = await fetch(url, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(params),
+//       mode: "cors",
+//     });
+
+//     if (!response.ok) {
+//       const errorData = await response.json();
+//       throw new Error(errorData.error || "Müşteri ekleme işlemi başarısız oldu.");
+//     }
+
+//     const apiResponse: ApiResponse = await response.json();
+
+//     if (!apiResponse.SQL_Data) {
+//       throw new Error("SQL_Data alanı boş döndü.");
+//     }
+
+//     // SQL_Data stringini parse et
+//     const sqlData: SQLDataResponse = JSON.parse(apiResponse.SQL_Data);
+//     sqlData.DATA = sqlData.DATA.map((item) => ({
+//       ...item,
+//     }));
+
+//     return sqlData;
+//   } catch (error: any) {
+//     console.error("Müşteri sorgulama hatası:", error);
+//     throw new Error(
+//       error.message || "Müşteri sorgulama sırasında bir hata oluştu."
+//     );
+//   }
+// }

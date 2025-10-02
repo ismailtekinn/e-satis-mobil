@@ -99,16 +99,16 @@ const CustomerSelectDropDownModal: React.FC<AddCustomerDropDownProps> = ({
   const handleSelectOption = (option: AddCustomerDropDownOption) => {
     switch (type) {
       case "kanGrubu":
-        setAddCustomForm({ ...addCustomForm, kanGrubu: option.title });
+        setAddCustomForm({ ...addCustomForm, KAN_GRUBU: option.title });
         break;
       case "cinsiyet":
-        setAddCustomForm({ ...addCustomForm, cinsiyet: option.title });
+        setAddCustomForm({ ...addCustomForm, M_CINSIYETI: Number(option.id) });
         break;
       case "musteriGrubu":
-        setAddCustomForm({ ...addCustomForm, musteriGrubu1: option.title });
+        setAddCustomForm({ ...addCustomForm, GRUP_NO: option.id });
         break;
       case "meslek":
-        setAddCustomForm({ ...addCustomForm, meslek: option.title });
+        setAddCustomForm({ ...addCustomForm, MESLEK_NO: option.title });
     }
     onClose(); // seçince modal kapanacak
   };
@@ -145,7 +145,7 @@ const CustomerSelectDropDownModal: React.FC<AddCustomerDropDownProps> = ({
         if (date) {
           setAddCustomForm({
             ...addCustomForm,
-            dogumYeriTarihi: date,
+            M_DOGUM_TARIHI: date.toDateString(),
           });
           onClose();
         }
@@ -184,8 +184,8 @@ const CustomerSelectDropDownModal: React.FC<AddCustomerDropDownProps> = ({
                 onPress={handleDatePick}
               >
                 <Text style={{ color: "#000", padding: 12 }}>
-                  {addCustomForm.dogumYeriTarihi
-                    ? addCustomForm.dogumYeriTarihi.toLocaleDateString() // Date -> string
+                  {addCustomForm.M_DOGUM_TARIHI
+                    ? addCustomForm.M_DOGUM_TARIHI
                     : "Şehir / GG.AA.YYYY"}
                 </Text>
               </TouchableOpacity>

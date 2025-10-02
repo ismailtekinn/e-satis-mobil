@@ -20,13 +20,11 @@ export interface SearchCustomerFields {
   Adet?: number;
 }
 
-
-
 export interface SelectedCustomer {
-  id: string;           // JSON'daki "ID"
-  firstName: string;    // JSON'daki "MUSTERI_ADI"
-  lastName: string;     // JSON'daki "MUSTERI_SOYADI"
-  phone: string;        // JSON'daki "TELEFON_1"
+  id: string; // JSON'daki "ID"
+  firstName: string; // JSON'daki "MUSTERI_ADI"
+  lastName: string; // JSON'daki "MUSTERI_SOYADI"
+  phone: string; // JSON'daki "TELEFON_1"
   // Opsiyonel alanlar
   CINSIYETI?: string;
   DOGUM_TARIHI?: string;
@@ -44,14 +42,13 @@ export interface SelectedCustomer {
   VERGI_NUMARASI?: string;
 }
 
-
 export type AddCustomerFormType = {
   mKod: string;
   musteriSoydı: string;
   musteriAdi: string;
   meslek: string;
   musteriGrubu1: string;
-  aileHekimi:string;
+  aileHekimi: string;
   yupass: string;
   tcKimlikNo: string;
   telkod: string;
@@ -77,8 +74,9 @@ export type AddCustomerFormType = {
   secimTuru: string;
 };
 
-
 export type AddCustomerFormTypeDeneme = {
+  WebErisimKullanici: string;
+  WebErisimSifre: string;
   CARI_ADI: string;
   CARI_UNVANI: string;
   TUR_KODU: string;
@@ -110,4 +108,5 @@ export type AddCustomerFormTypeDeneme = {
   MESLEK_NO?: string;
   SMS_GONDERILMESIN?: number;
   KART_NO?: string;
+  
 };
