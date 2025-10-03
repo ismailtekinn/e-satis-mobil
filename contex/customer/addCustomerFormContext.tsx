@@ -85,10 +85,12 @@ export const AddCustomerFormProvider = ({
     {
       WebErisimKullanici: "TRIA_TEST",
       WebErisimSifre: "SFR57220",
+      Id:0,
       CARI_ADI: "",
       CARI_UNVANI: "",
       TUR_KODU: "MÜSTERI",
       TELEFON: "",
+      Yas:"",
       INSERT_USER: "ADMIN",
       UPDATE_USER: "ADMIN",
       GSM: "",
@@ -113,7 +115,25 @@ export const AddCustomerFormProvider = ({
       KAN_GRUBU: "",
       MESLEK_NO: "",
       SMS_GONDERILMESIN: 0,
+
       KART_NO: "",
+      KartAdı: "",
+      YetkiliAdi: "",
+      VeresiyeLimiti: "",
+      EmanetLimiti: "",
+      MusteriBorcu: "",
+      MusteriAlacagi: "",
+
+      MusteriUyarilari: [
+        { id: 1, label: "Bu müşteri riskli grupta." },
+        { id: 2, label: "Adres eksik." },
+        { id: 3, label: "Telefon numarası doğrulanmadı." },
+      ],
+      AileFertTotal: "3",
+      ToplamAileEmanetAdet: "20",
+      AileFertBorç: "350",
+      AileFertAlacak: "450",
+      ToplamAileEmanetTutar: "100",
     }
   );
 

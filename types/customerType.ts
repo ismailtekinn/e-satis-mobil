@@ -75,6 +75,7 @@ export type AddCustomerFormType = {
 };
 
 export type AddCustomerFormTypeDeneme = {
+  Id: number;
   WebErisimKullanici: string;
   WebErisimSifre: string;
   CARI_ADI: string;
@@ -85,6 +86,7 @@ export type AddCustomerFormTypeDeneme = {
   UPDATE_USER: string;
   GSM: string;
   TC_KIMLIK_NO: string;
+  Yas: string;
 
   // Opsiyonel alanlar
   ID?: number;
@@ -108,5 +110,18 @@ export type AddCustomerFormTypeDeneme = {
   MESLEK_NO?: string;
   SMS_GONDERILMESIN?: number;
   KART_NO?: string;
-  
+  KartAdı?: string;
+
+  YetkiliAdi?: string;
+  VeresiyeLimiti?: string;
+  EmanetLimiti?: string;
+  MusteriBorcu?: string;
+  MusteriAlacagi?: string;
+  MedeniHali?: string;
+ MusteriUyarilari?: { id: number; label: string }[];
+  AileFertTotal: string;
+  ToplamAileEmanetAdet: string;
+  AileFertBorç: string;
+  AileFertAlacak: string;
+  ToplamAileEmanetTutar: string;
 };
