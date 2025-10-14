@@ -12,11 +12,12 @@ import {
   Keyboard,
   Alert,
 } from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import CustomerSelect from "./CustomerSelect";
 import { SearchCustomerFields, SelectedCustomer } from "../types/customerType";
 import {
   CustomerItem,
+  DATum,
   SQLDataResponse,
 } from "../types/apiresponse/searchCustomers";
 import { searchCustomers } from "../api/customer";
@@ -28,24 +29,26 @@ import { MüşteriAramaTipi } from "../types/enums/tria";
 import AlertModal from "../component/AlertModal";
 import CustomerSelectModal from "../component/CustomerAddModal";
 import { use } from "i18next";
-import { fetchSqlData } from "../api/generic";
-import { SqlData } from "../types/apiresponse/genericResponseType";
+import { fetchSearchMethot } from "../api/generic";
 import CustomerAddModal from "../component/CustomerAddModal";
 import { BussinessProvider } from "../contex/addCustomerModal/bussinessContext";
+import { MUSTERI_SORGULA_URL } from "../constants/constant";
 
-const { width } = Dimensions.get("window");
-
+const screenWidth = Dimensions.get("window").width;
 const CustomerSearchScreen: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const [search, setSearch] = useState<string>("");
-  const [filtered, setFiltered] = useState<CustomerItem[]>([]);
+  // const [filtered, setFiltered] = useState<CustomerItem[]>([]);
+  const [filtered, setFiltered] = useState<DATum[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOption, setSelectedOption] = useState("Müşteri Adına Göre");
   const { selectedCustomer, setSelectedCustomer } = useSelectedCustomer();
   const [alertModalVisible, setAlertModalVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [addCustomerModalVisible, setAddCustomerModalVisible] = useState(false);
+
+  const [isBlinking, setIsBlinking] = useState(true);
 
   const [searchData, setSearchData] = useState<SearchCustomerFields>({
     WebErisimKullanici: "TRIA_TEST",
@@ -54,6 +57,7 @@ const CustomerSearchScreen: React.FC = () => {
     AramaTipi: 0,
     Baslangic: 0,
     Adet: 100,
+    DetayDataGetir: true,
   });
 
   //   const handleSearch = (text: string) => {
@@ -83,7 +87,9 @@ const CustomerSearchScreen: React.FC = () => {
     navigation.goBack();
   };
   const handleSelectOption = () => {
-    if (selectedOption === "Müşteri Adına Göre") {
+    if (selectedOption === "Müşteri Adına,Tc,Vergi Noya Göre") {
+      setSearchData((prev) => ({ ...prev, AramaTipi: 999 }));
+    } else if (selectedOption === "Müşteri Adına Göre") {
       setSearchData((prev) => ({ ...prev, AramaTipi: 0 }));
     } else if (selectedOption === "Müşteri Soyadına Göre") {
       setSearchData((prev) => ({ ...prev, AramaTipi: 1 }));
@@ -104,23 +110,7 @@ const CustomerSearchScreen: React.FC = () => {
   useEffect(() => {
     handleSelectOption();
   }, [selectedOption]);
-  // const handleCustomerSearch = async () => {
-  //   try {
-  //     if (!search || search.trim() === "") {
-  //       setAlertMessage("Lütfen arma parametresi giriniz");
-  //       setAlertModalVisible(true);
-  //       return; // Fonksiyondan çık
-  //     }
-  //     console.log(
-  //       "arama verisi aranan tipi konsole yazdırılıyor: ",
-  //       searchData
-  //     );
-  //     const response: SQLDataResponse = await searchCustomers(searchData);
-  //     setFiltered(response.DATA ?? []);
-  //   } catch (error: any) {
-  //     console.error(error);
-  //   }
-  // };
+
   const handleCustomerSearch = async () => {
     try {
       if (!search || search.trim() === "") {
@@ -128,29 +118,24 @@ const CustomerSearchScreen: React.FC = () => {
         setAlertModalVisible(true);
         return;
       }
-
-      console.log(
-        "Arama verisi aranan tipi konsole yazdırılıyor: ",
+      // const url = "http://192.168.0.162:44342/MusteriSorgula";
+      const response = await fetchSearchMethot<DATum, typeof searchData>(
+        MUSTERI_SORGULA_URL,
         searchData
       );
-
-      const url = "http://94.54.83.21:8082/TriaRestEczane/MusteriSorgula";
-
-      // Generic fetch ile müşteri verisini alıyoruz
-
-      const response: SqlData<CustomerItem> = await fetchSqlData<CustomerItem>(
-        url,
-        searchData as unknown as Record<string, unknown>
-      );
-
-      // Filtered state'e direkt DATA'yı atıyoruz
-      setFiltered(response.DATA ?? []);
+      setFiltered(response.main.DATA ?? []);
     } catch (error: any) {
       console.error("Müşteri arama hatası:", error);
     }
   };
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setIsBlinking((prev) => !prev);
+  //   }, 600); // yarım saniyede bir değiştir
+  //   return () => clearInterval(interval);
+  // }, [filtered]);
 
-  const renderItem: ListRenderItem<CustomerItem> = ({ item }) => (
+  const renderItem: ListRenderItem<DATum> = ({ item }) => (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
@@ -161,10 +146,21 @@ const CustomerSearchScreen: React.FC = () => {
         style={styles.row}
         activeOpacity={0.7}
         onPress={() => {
-          console.log("seçilen müşteriyi console yazdırıyorum", item);
           handleSelectCustomer(item);
         }}
       >
+        {item?.UYARI_BILGI &&
+          item.UYARI_BILGI.trim() !== "" &&
+          item.UYARI_BILGI !== "null" && (
+            <View style={styles.warningStrip}>
+              <MaterialIcons
+                name="warning"
+                size={26}
+                color="white"
+                style={{ opacity: isBlinking ? 1 : 0 }}
+              />
+            </View>
+          )}
         <View style={[styles.cell, { width: 120 }]}>
           <Text style={styles.cellLabel}>M.Kodu</Text>
           <Text style={styles.cellValue}>{item.MUSTERI_KODU}</Text>
@@ -203,13 +199,10 @@ const CustomerSearchScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Müşteri Arama Listesi</Text>
         <View style={styles.headerLine} />
       </View>
-
-      {/* Search Section */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <AntDesign
@@ -243,7 +236,6 @@ const CustomerSearchScreen: React.FC = () => {
             </TouchableOpacity>
           )}
         </View>
-
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={[styles.actionButton, styles.findButton]}
@@ -267,7 +259,6 @@ const CustomerSearchScreen: React.FC = () => {
               {selectedOption}
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.iconButton, styles.formButton]}
             onPress={() => {
@@ -276,22 +267,14 @@ const CustomerSearchScreen: React.FC = () => {
           >
             <Ionicons name="person-add" size={20} color="#fff" />
           </TouchableOpacity>
-
-          {/* <TouchableOpacity style={[styles.iconButton, styles.checkButton]}>
-            <Ionicons name="checkmark-circle" size={20} color="#fff" />
-          </TouchableOpacity> */}
         </View>
       </View>
-
-      {/* Results Info */}
       <View style={styles.resultsInfo}>
         <Text style={styles.resultsText}>
           {filtered.length} müşteri bulundu
         </Text>
         <Text style={styles.swipeHint}>← Detay için sağa kaydırın →</Text>
       </View>
-
-      {/* Table */}
       {search.length > 0 && (
         <View style={styles.tableContainer}>
           <FlatList
@@ -312,7 +295,6 @@ const CustomerSearchScreen: React.FC = () => {
           setSelectedOption={setSelectedOption}
         />
       </View>
-
       <AlertModal
         visible={alertModalVisible}
         message={alertMessage}
@@ -419,6 +401,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
+  },
+
+  warningStrip: {
+    width: screenWidth * 0.07, // ekran genişliğinin %3'ü kadar
+    backgroundColor: "orange",
+    borderTopLeftRadius: 6,
+    borderBottomLeftRadius: 6,
+    alignContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+    flexDirection: "row",
   },
   cell: { paddingHorizontal: 8 },
   cellLabel: {

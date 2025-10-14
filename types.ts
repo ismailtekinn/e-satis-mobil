@@ -14,8 +14,8 @@ export type RootStackParamList = {
   CashReceivable: undefined;
   AddCustomer: undefined;
   AddSuplier: undefined;
-  Login: undefined;
-  Register: undefined;
+  LoginScreen: undefined;
+  RegisterScreen: undefined;
   AddNew: undefined;
   Financial: undefined;
   NewSale: undefined;
@@ -43,6 +43,7 @@ export type RootStackParamList = {
   BasketCardScreen: undefined;
   StaffScreen: undefined;
   CustomerSearchScreen:undefined;
+  TriaSplashScreen:undefined;
 
 };
 

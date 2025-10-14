@@ -7,7 +7,6 @@ import { StyleSheet, Text, View } from "react-native";
 import "./constants/i18n/i18n";
 
 import AppRoute from "./AppRoute";
-import { UserProvider } from "./contex/useContext";
 import { SelectedProductProvider } from "./contex/selectedProductContext";
 import { RaporTypeProvider } from "./contex/useRaporTypeContext";
 import { FileTypeProvider } from "./contex/fileTypeContext";
@@ -26,12 +25,10 @@ export default function App() {
         <FileTypeProvider>
           <RaporTypeProvider>
             <SelectedProductProvider>
-              <UserProvider>
-                <AppProvider>
-                  <StatusBar style="auto" />
-                  <AppRoute />
-                </AppProvider>
-              </UserProvider>
+                  <AppProvider>
+                    <StatusBar style="auto" />
+                    <AppRoute />
+                  </AppProvider>
             </SelectedProductProvider>
           </RaporTypeProvider>
         </FileTypeProvider>

@@ -1,14 +1,13 @@
 {
   "expo": {
-    "name": "e-order",
-    "slug": "e-order",
+    "name": "tria-mobile",
+    "slug": "tria-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/e-market.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/e-market.png",
-      "resizeMode": "contain",
+      "image": "./assets/triaslidedeneme.png",
+      "resizeMode": "cover",
       "backgroundColor": "#fafbfb"
     },
     "ios": {
@@ -18,7 +17,7 @@
       "package": "com.bybrstekin.emarket",
       "permissions": ["INTERNET"],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/e-market.png",
+        "foregroundImage": "./assets/triaslide.png",
         "backgroundColor": "#ffffff"
       },
       "intentFilters": [

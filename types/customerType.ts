@@ -18,6 +18,10 @@ export interface SearchCustomerFields {
   AramaTipi: number;
   Baslangic?: number;
   Adet?: number;
+  MusteriKartBilgileriGetir?: boolean;
+  DetayDataGetir?: true;
+  CariBakiyeGetir?: true;
+  AileBakiyesiGetir?: true;
 }
 
 export interface SelectedCustomer {
@@ -75,7 +79,6 @@ export type AddCustomerFormType = {
 };
 
 export type AddCustomerFormTypeDeneme = {
-  Id: number;
   WebErisimKullanici: string;
   WebErisimSifre: string;
   CARI_ADI: string;
@@ -101,16 +104,19 @@ export type AddCustomerFormTypeDeneme = {
   M_DOGUM_YERI?: string;
   M_DOGUM_TARIHI?: string;
   M_MEDENI_HALI?: number;
-  M_CINSIYETI?: number;
+  M_CINSIYETI?: string;
   SMS_GRUP_NO?: string;
   GRUP_NO?: string;
   PASIF?: number;
   YUPAS_NO?: string;
   KAN_GRUBU?: string;
   MESLEK_NO?: string;
+  MESLEK?: string;
   SMS_GONDERILMESIN?: number;
   KART_NO?: string;
   KartAdı?: string;
+  KartDurumu?: string;
+  KartTuru?: string;
 
   YetkiliAdi?: string;
   VeresiyeLimiti?: string;
@@ -118,10 +124,26 @@ export type AddCustomerFormTypeDeneme = {
   MusteriBorcu?: string;
   MusteriAlacagi?: string;
   MedeniHali?: string;
- MusteriUyarilari?: { id: number; label: string }[];
+  MusteriUyarilari?: { id: number; label: string }[];
+  UYARI_BILGI?: string;
   AileFertTotal: string;
   ToplamAileEmanetAdet: string;
   AileFertBorç: string;
   AileFertAlacak: string;
   ToplamAileEmanetTutar: string;
+  E_FAT_DURUM: string;
+  E_FAT_MUKELLEFI: string;
+  E_FAT_ODEME_EKLE: string;
+  E_FAT_POS_KUTUSU: string;
+  E_FAT_SENARYO: string;
+  FIRMA_SAHIS_DURUMU?: string;
+  FIYAT_NO: string;
+  MusteriGruoNo2: string;
+  MusteriGruoNo3: string;
+  MusteriGruoNo4: string;
+  MusteriGruoNo5: string;
+  MUSTERI_KODU?: string;
+  RISK_LIMITI?: string;
+  TAKIPLI: string;
+  UTS_FIRMA_NO?: string;
 };

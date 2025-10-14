@@ -27,29 +27,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const userId = userData?.UserID
 
-  useEffect(() => {
-    const loadStoredData = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem("token");
-        const storedUser = await AsyncStorage.getItem("userData");
-
-        if (storedToken && storedUser) {
-          setToken(JSON.parse(storedToken));
-           setUserData(JSON.parse(storedUser));
-        }
-      } catch (error) {
-        console.error("Failed to load token:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadStoredData();
-  }, []);
 
   const handleLogin = async (user: User) => {
     try {
       setUserData(user);
+      console.log("handleLogin methodu çağrıldı :", user)
       await AsyncStorage.setItem("userData", JSON.stringify(user));
     } catch (error) {
       console.error("Failed to save user data:", error);

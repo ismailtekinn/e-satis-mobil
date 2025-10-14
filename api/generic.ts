@@ -1,41 +1,101 @@
 import {
   AddUpdateApiResponse,
   AddUpdateData,
+  // BackendResponse,
+  // SqlData,
+} from "../types/apiresponse/genericResponseType";
+import {
   BackendResponse,
   SqlData,
-} from "../types/apiresponse/genericResponseType";
+} from "../types/apiresponse/newGenericResponseType";
 
-export async function fetchSqlData<T>(
-  url: string,
-  params: Record<string, unknown>
-): Promise<SqlData<T>> {
+export function safeJSONParse<T>(str: string): T {
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
+    return JSON.parse(str) as T;
+  } catch {
+    const cleaned = str.replace(/"([^"]*(?:\\.[^"]*)*)"/g, (match, content) => {
+      return `"${content
+        .replace(/\r/g, "\\r")
+        .replace(/\n/g, "\\n")
+        .replace(/\t/g, "\\t")}"`;
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.ErrorMessage || "API isteği başarısız oldu.");
-    }
-
-    const backendResponse: BackendResponse = await response.json();
-
-    if (!backendResponse.SQL_Data) {
-      throw new Error("SQL_Data alanı boş döndü.");
-    }
-
-    return JSON.parse(backendResponse.SQL_Data) as SqlData<T>;
-  } catch (error: any) {
-    console.error("API hatası:", error);
-    throw new Error(error.message || "API sırasında bir hata oluştu.");
+    return JSON.parse(cleaned) as T;
   }
+}
+
+// export async function fetchSearchMethot<T, TParams extends object>(
+//   url: string,
+//   params: TParams
+// ): Promise<{ main: SqlData<T>; [key: string]: SqlData<any> | null }> {
+//   try {
+//     const response = await fetch(url, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(params),
+//     });
+//     if (response.ok != true) {
+//       const errorData = await response.json().catch(() => null);
+//       throw new Error(errorData?.ErrorMessage || "API isteği başarısız oldu.");
+//     }
+//     const backendResponse: BackendResponse = await response.json();
+//     if (!backendResponse.SQL_Data) {
+//       throw new Error("SQL_Data alanı boş döndü.");
+//     }
+//     const mainData: SqlData<T> = safeJSONParse(backendResponse.SQL_Data);
+//     const result: { main: SqlData<T>; [key: string]: SqlData<any> | null } = {
+//       main: mainData,
+//     };
+
+//     for (let i = 2; i <= 10; i++) {
+//       const key = `SQL_Data_${i}` as keyof BackendResponse;
+//       result[key] = backendResponse[key]
+//         ? safeJSONParse(backendResponse[key]!)
+//         : null;
+//     }
+
+//     return result;
+//   } catch (error: any) {
+//     console.error("API hatası:", error);
+//     throw new Error(error.message || "API sırasında bir hata oluştu.");
+//   }
+// }
+
+export async function fetchSearchMethot<T, TParams extends object>(
+  url: string,
+  params: TParams
+): Promise<{ main: SqlData<T>; [key: string]: SqlData<any> | null }> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.ErrorMessage || "API isteği başarısız oldu.");
+  }
+
+  const data: BackendResponse = await response.json();
+  if (!data.SQL_Data) throw new Error("SQL_Data alanı boş döndü.");
+
+  const result: any = { main: safeJSONParse<SqlData<T>>(data.SQL_Data) };
+
+  for (let i = 2; i <= 10; i++) {
+    const key = `SQL_Data_${i}`;
+    result[key] = data[key as keyof BackendResponse]
+      ? safeJSONParse(data[key as keyof BackendResponse]!)
+      : null;
+  }
+
+  return result;
 }
 
 export async function addUpdateEntity(url: string, data: AddUpdateData) {
   try {
+    console.log(
+      "addUpdateEntity methodu çağrıldı url console yazdırılıyor: ",
+      url
+    );
     const response = await fetch(url, {
       method: "POST",
       headers: {

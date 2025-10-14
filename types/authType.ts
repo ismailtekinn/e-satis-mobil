@@ -1,6 +1,7 @@
 export type SignIn = {
-    phone: string;
-    password: string;
+    phone?: string;
+    KullaniciKodu: string;
+    Sifre: string;
   };
   
   export type Register = {

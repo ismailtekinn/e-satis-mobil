@@ -3,19 +3,24 @@ import { AlertProvider, useAlert } from "../contex/AlertContext";
 import AlertModal from "../component/AlertModal";
 import { SelectedCustomerProvider } from "../contex/selectedCustomerContex";
 import { AddCustomerFormProvider } from "../contex/customer/addCustomerFormContext";
-import { BussinessProvider } from "../contex/addCustomerModal/bussinessContext";
+import { KullaniciProvider } from "../contex/kullaniciContext";
+import { AutoLoginProvider } from "../contex/settings/autoLoginContext";
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AlertProvider>
-      {/* <BussinessProvider> */}
-        <AddCustomerFormProvider>
-          <SelectedCustomerProvider>
-            <AppInner>{children}</AppInner>
-          </SelectedCustomerProvider>
-        </AddCustomerFormProvider>
-      {/* </BussinessProvider> */}
-    </AlertProvider>
+    <AutoLoginProvider>
+      <AlertProvider>
+        {/* <BussinessProvider> */}
+        <KullaniciProvider>
+          <AddCustomerFormProvider>
+            <SelectedCustomerProvider>
+              <AppInner>{children}</AppInner>
+            </SelectedCustomerProvider>
+          </AddCustomerFormProvider>
+        </KullaniciProvider>
+        {/* </BussinessProvider> */}
+      </AlertProvider>
+    </AutoLoginProvider>
   );
 };
 

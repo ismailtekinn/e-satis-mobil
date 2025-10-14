@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,14 @@ import {
   Switch,
   Alert,
   Dimensions,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import SettingScreenDropDownModel from "../component/SettingScreenDropDownModel";
+import { AutoLoginOption } from "../types/enums/settings";
+import { useAutoLogin } from "../contex/settings/autoLoginContext";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 interface User {
   id: string;
@@ -24,48 +27,60 @@ interface User {
 
 const SettingsScreen = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [dropDownMolalVisible, setDropDownModalVisible] = useState(false);
+  const { autoLogin, setAutoLogin } = useAutoLogin();
+
+  const [selectedValue, setSelectedValue] = useState<AutoLoginOption>(
+    AutoLoginOption.Hayir
+  );
+
   const [settings, setSettings] = useState({
-    storeName: 'Mağaza Adı',
-    language: 'tr',
-    currency: 'TRY',
-    theme: 'light',
-    serverIP: '192.168.1.1',
-    port: '3000',
-    dbUser: 'admin',
-    dbPassword: '',
+    storeName: "Mağaza Adı",
+    language: "tr",
+    currency: "TRY",
+    theme: "light",
+    serverIP: "192.168.1.1",
+    port: "3000",
+    dbUser: "admin",
+    dbPassword: "",
     autoBackup: true,
-    version: '1.0.0',
-    apiKey: 'sk-1234567890abcdef',
-    licenseInfo: 'Premium License'
+    version: "1.0.0",
+    apiKey: "sk-1234567890abcdef",
+    licenseInfo: "Premium License",
   });
-  
+
   const [users, setUsers] = useState<User[]>([
-    { id: '1', name: 'Admin User', email: 'admin@example.com', role: 'Admin' },
-    { id: '2', name: 'Store Manager', email: 'manager@example.com', role: 'Manager' }
+    { id: "1", name: "Admin User", email: "admin@example.com", role: "Admin" },
+    {
+      id: "2",
+      name: "Store Manager",
+      email: "manager@example.com",
+      role: "Manager",
+    },
   ]);
 
   const tabs = [
-    { title: 'Genel', icon: 'settings-outline' },
-    { title: 'Bağlantı', icon: 'wifi-outline' },
-    { title: 'Kullanıcı & Yetki', icon: 'people-outline' },
-    { title: 'Yedekleme', icon: 'cloud-upload-outline' },
-    { title: 'Gelişmiş', icon: 'code-slash-outline' }
+    { title: "Genel", icon: "settings-outline" },
+    { title: "Bağlantı", icon: "wifi-outline" },
+    { title: "Kullanıcı & Yetki", icon: "people-outline" },
+    { title: "Yedekleme", icon: "cloud-upload-outline" },
+    { title: "Gelişmiş", icon: "code-slash-outline" },
   ];
 
   const handleSave = () => {
-    Alert.alert('Başarılı', 'Ayarlar kaydedildi!');
+    Alert.alert("Başarılı", "Ayarlar kaydedildi!");
   };
 
   const testConnection = () => {
-    Alert.alert('Test Ediliyor', 'Bağlantı test ediliyor...');
+    Alert.alert("Test Ediliyor", "Bağlantı test ediliyor...");
   };
 
   const manualBackup = () => {
-    Alert.alert('Yedekleme', 'Manuel yedekleme başlatılıyor...');
+    Alert.alert("Yedekleme", "Manuel yedekleme başlatılıyor...");
   };
 
   const addNewUser = () => {
-    Alert.alert('Yeni Kullanıcı', 'Yeni kullanıcı ekleme formu açılıyor...');
+    Alert.alert("Yeni Kullanıcı", "Yeni kullanıcı ekleme formu açılıyor...");
   };
 
   const renderTabContent = () => {
@@ -74,13 +89,15 @@ const SettingsScreen = () => {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.sectionTitle}>Genel Ayarlar</Text>
-            
+
             <View style={styles.formGroup}>
               <Text style={styles.label}>Mağaza Adı</Text>
               <TextInput
                 style={styles.input}
                 value={settings.storeName}
-                onChangeText={(text) => setSettings({...settings, storeName: text})}
+                onChangeText={(text) =>
+                  setSettings({ ...settings, storeName: text })
+                }
                 placeholder="Mağaza adınızı girin"
               />
             </View>
@@ -91,6 +108,27 @@ const SettingsScreen = () => {
                 <Text style={styles.pickerText}>Türkçe</Text>
                 <Ionicons name="chevron-down" size={20} color="#666" />
               </View>
+            </View>
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Otomatik Login</Text>
+              <TouchableOpacity
+                style={styles.pickerContainer}
+                onPress={() => setDropDownModalVisible(true)}
+              >
+                <Text style={styles.pickerText}>{autoLogin}</Text>
+                <Ionicons name="chevron-down" size={20} color="#666" />
+              </TouchableOpacity>
+
+              <SettingScreenDropDownModel
+                title="Otomatik Login Seçiniz"
+                options={[AutoLoginOption.Evet, AutoLoginOption.Hayir]}
+                visible={dropDownMolalVisible}
+                onClose={() => setDropDownModalVisible(false)}
+                onSelect={(value: AutoLoginOption) => {
+                  setSelectedValue(value);
+                  setDropDownModalVisible(false);
+                }}
+              />
             </View>
 
             <View style={styles.formGroup}>
@@ -104,13 +142,46 @@ const SettingsScreen = () => {
             <View style={styles.formGroup}>
               <Text style={styles.label}>Tema</Text>
               <View style={styles.themeOptions}>
-                <TouchableOpacity style={[styles.themeOption, settings.theme === 'light' && styles.themeOptionActive]}>
-                  <Ionicons name="sunny" size={24} color={settings.theme === 'light' ? '#007AFF' : '#666'} />
-                  <Text style={[styles.themeOptionText, settings.theme === 'light' && styles.themeOptionTextActive]}>Açık</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.themeOption,
+                    settings.theme === "light" && styles.themeOptionActive,
+                  ]}
+                >
+                  <Ionicons
+                    name="sunny"
+                    size={24}
+                    color={settings.theme === "light" ? "#007AFF" : "#666"}
+                  />
+                  <Text
+                    style={[
+                      styles.themeOptionText,
+                      settings.theme === "light" &&
+                        styles.themeOptionTextActive,
+                    ]}
+                  >
+                    Açık
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.themeOption, settings.theme === 'dark' && styles.themeOptionActive]}>
-                  <Ionicons name="moon" size={24} color={settings.theme === 'dark' ? '#007AFF' : '#666'} />
-                  <Text style={[styles.themeOptionText, settings.theme === 'dark' && styles.themeOptionTextActive]}>Koyu</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.themeOption,
+                    settings.theme === "dark" && styles.themeOptionActive,
+                  ]}
+                >
+                  <Ionicons
+                    name="moon"
+                    size={24}
+                    color={settings.theme === "dark" ? "#007AFF" : "#666"}
+                  />
+                  <Text
+                    style={[
+                      styles.themeOptionText,
+                      settings.theme === "dark" && styles.themeOptionTextActive,
+                    ]}
+                  >
+                    Koyu
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -121,13 +192,15 @@ const SettingsScreen = () => {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.sectionTitle}>Bağlantı Ayarları</Text>
-            
+
             <View style={styles.formGroup}>
               <Text style={styles.label}>Sunucu IP</Text>
               <TextInput
                 style={styles.input}
                 value={settings.serverIP}
-                onChangeText={(text) => setSettings({...settings, serverIP: text})}
+                onChangeText={(text) =>
+                  setSettings({ ...settings, serverIP: text })
+                }
                 placeholder="192.168.1.1"
                 keyboardType="numeric"
               />
@@ -138,7 +211,9 @@ const SettingsScreen = () => {
               <TextInput
                 style={styles.input}
                 value={settings.port}
-                onChangeText={(text) => setSettings({...settings, port: text})}
+                onChangeText={(text) =>
+                  setSettings({ ...settings, port: text })
+                }
                 placeholder="3000"
                 keyboardType="numeric"
               />
@@ -149,7 +224,9 @@ const SettingsScreen = () => {
               <TextInput
                 style={styles.input}
                 value={settings.dbUser}
-                onChangeText={(text) => setSettings({...settings, dbUser: text})}
+                onChangeText={(text) =>
+                  setSettings({ ...settings, dbUser: text })
+                }
                 placeholder="Kullanıcı adı"
               />
             </View>
@@ -159,13 +236,18 @@ const SettingsScreen = () => {
               <TextInput
                 style={styles.input}
                 value={settings.dbPassword}
-                onChangeText={(text) => setSettings({...settings, dbPassword: text})}
+                onChangeText={(text) =>
+                  setSettings({ ...settings, dbPassword: text })
+                }
                 placeholder="Şifre"
                 secureTextEntry
               />
             </View>
 
-            <TouchableOpacity style={styles.testButton} onPress={testConnection}>
+            <TouchableOpacity
+              style={styles.testButton}
+              onPress={testConnection}
+            >
               <Ionicons name="flash" size={20} color="white" />
               <Text style={styles.testButtonText}>Bağlantıyı Test Et</Text>
             </TouchableOpacity>
@@ -176,7 +258,7 @@ const SettingsScreen = () => {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.sectionTitle}>Kullanıcı & Yetki Yönetimi</Text>
-            
+
             <TouchableOpacity style={styles.addButton} onPress={addNewUser}>
               <Ionicons name="person-add" size={20} color="white" />
               <Text style={styles.addButtonText}>Yeni Kullanıcı Ekle</Text>
@@ -223,8 +305,11 @@ const SettingsScreen = () => {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.sectionTitle}>Yedekleme & Güncelleme</Text>
-            
-            <TouchableOpacity style={styles.backupButton} onPress={manualBackup}>
+
+            <TouchableOpacity
+              style={styles.backupButton}
+              onPress={manualBackup}
+            >
               <Ionicons name="download" size={20} color="white" />
               <Text style={styles.backupButtonText}>Manuel Yedekle</Text>
             </TouchableOpacity>
@@ -232,12 +317,16 @@ const SettingsScreen = () => {
             <View style={styles.formGroup}>
               <View style={styles.switchRow}>
                 <Text style={styles.label}>Otomatik Yedekleme</Text>
-                <Switch 
+                <Switch
                   value={settings.autoBackup}
-                  onValueChange={(value) => setSettings({...settings, autoBackup: value})}
+                  onValueChange={(value) =>
+                    setSettings({ ...settings, autoBackup: value })
+                  }
                 />
               </View>
-              <Text style={styles.helpText}>Günlük otomatik yedekleme yapılır</Text>
+              <Text style={styles.helpText}>
+                Günlük otomatik yedekleme yapılır
+              </Text>
             </View>
 
             <View style={styles.versionInfo}>
@@ -248,7 +337,9 @@ const SettingsScreen = () => {
               </View>
               <TouchableOpacity style={styles.updateButton}>
                 <Ionicons name="refresh" size={16} color="#007AFF" />
-                <Text style={styles.updateButtonText}>Güncelleme Kontrol Et</Text>
+                <Text style={styles.updateButtonText}>
+                  Güncelleme Kontrol Et
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -258,7 +349,7 @@ const SettingsScreen = () => {
         return (
           <View style={styles.tabContent}>
             <Text style={styles.sectionTitle}>Gelişmiş Ayarlar</Text>
-            
+
             <TouchableOpacity style={styles.advancedItem}>
               <View style={styles.advancedItemLeft}>
                 <Ionicons name="bug" size={24} color="#FF6B6B" />
@@ -273,7 +364,9 @@ const SettingsScreen = () => {
                 <TextInput
                   style={[styles.input, styles.apiKeyInput]}
                   value={settings.apiKey}
-                  onChangeText={(text) => setSettings({...settings, apiKey: text})}
+                  onChangeText={(text) =>
+                    setSettings({ ...settings, apiKey: text })
+                  }
                   placeholder="API Anahtarınız"
                   secureTextEntry
                 />
@@ -288,8 +381,12 @@ const SettingsScreen = () => {
               <View style={styles.licenseItem}>
                 <Ionicons name="shield-checkmark" size={24} color="#4CAF50" />
                 <View>
-                  <Text style={styles.licenseTitle}>{settings.licenseInfo}</Text>
-                  <Text style={styles.licenseExpiry}>Geçerlilik: 2025-12-31</Text>
+                  <Text style={styles.licenseTitle}>
+                    {settings.licenseInfo}
+                  </Text>
+                  <Text style={styles.licenseExpiry}>
+                    Geçerlilik: 2025-12-31
+                  </Text>
                 </View>
               </View>
             </View>
@@ -308,8 +405,8 @@ const SettingsScreen = () => {
         <Text style={styles.headerSubtitle}>Sistem ayarlarınızı yönetin</Text>
       </View>
 
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.tabsContainer}
         contentContainerStyle={styles.tabsContent}
@@ -320,21 +417,24 @@ const SettingsScreen = () => {
             style={[styles.tab, activeTab === index && styles.activeTab]}
             onPress={() => setActiveTab(index)}
           >
-            <Ionicons 
-              name={tab.icon as any} 
-              size={20} 
-              color={activeTab === index ? '#007AFF' : '#666'} 
+            <Ionicons
+              name={tab.icon as any}
+              size={20}
+              color={activeTab === index ? "#007AFF" : "#666"}
             />
-            <Text style={[styles.tabText, activeTab === index && styles.activeTabText]}>
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === index && styles.activeTabText,
+              ]}
+            >
               {tab.title}
             </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
-      <ScrollView style={styles.content}>
-        {renderTabContent()}
-      </ScrollView>
+      <ScrollView style={styles.content}>{renderTabContent()}</ScrollView>
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -349,31 +449,31 @@ const SettingsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
+    backgroundColor: "#F5F7FA",
   },
   header: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 20,
     paddingTop: 10,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "white",
+    textAlign: "center",
   },
   headerSubtitle: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
     marginTop: 5,
   },
   tabsContainer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderBottomWidth: 5,
-    height:60,
+    height: 60,
     // borderBottomColor: '#E1E8ED',
-    borderBottomColor: '#E1E8ED',
+    borderBottomColor: "#E1E8ED",
   },
   tabsContent: {
     paddingHorizontal: 10,
@@ -381,42 +481,42 @@ const styles = StyleSheet.create({
   tab: {
     paddingHorizontal: 20,
     paddingVertical: 15,
-    alignItems: 'center',
-    justifyContent:'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginHorizontal: 5,
     borderRadius: 10,
     minWidth: 100,
   },
   activeTab: {
-    backgroundColor: '#F0F8FF',
+    backgroundColor: "#F0F8FF",
   },
   tabText: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     // marginTop: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   activeTabText: {
-    color: '#007AFF',
-    fontWeight: '600',
+    color: "#007AFF",
+    fontWeight: "600",
   },
   content: {
-    flex:1,
-    minHeight:400,
+    flex: 1,
+    minHeight: 400,
   },
   tabContent: {
     padding: 20,
   },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C3E50',
+    fontWeight: "bold",
+    color: "#2C3E50",
     marginBottom: 20,
   },
   subsectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#34495E',
+    fontWeight: "600",
+    color: "#34495E",
     marginTop: 20,
     marginBottom: 15,
   },
@@ -425,238 +525,238 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2C3E50',
+    fontWeight: "600",
+    color: "#2C3E50",
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E1E8ED',
+    borderColor: "#E1E8ED",
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   pickerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: '#E1E8ED',
+    borderColor: "#E1E8ED",
     borderRadius: 10,
     padding: 15,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   pickerText: {
     fontSize: 16,
-    color: '#2C3E50',
+    color: "#2C3E50",
   },
   themeOptions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 15,
   },
   themeOption: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     padding: 20,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#E1E8ED',
-    backgroundColor: 'white',
+    borderColor: "#E1E8ED",
+    backgroundColor: "white",
   },
   themeOptionActive: {
-    borderColor: '#007AFF',
-    backgroundColor: '#F0F8FF',
+    borderColor: "#007AFF",
+    backgroundColor: "#F0F8FF",
   },
   themeOptionText: {
     marginTop: 8,
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   themeOptionTextActive: {
-    color: '#007AFF',
-    fontWeight: '600',
+    color: "#007AFF",
+    fontWeight: "600",
   },
   testButton: {
-    backgroundColor: '#4CAF50',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#4CAF50",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
   },
   testButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   addButton: {
-    backgroundColor: '#007AFF',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#007AFF",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
   },
   addButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   userItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E1E8ED',
+    borderColor: "#E1E8ED",
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   userAvatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#F0F8FF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#F0F8FF",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 15,
   },
   userName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2C3E50',
+    fontWeight: "600",
+    color: "#2C3E50",
   },
   userEmail: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: "#7F8C8D",
     marginTop: 2,
   },
   userRole: {
     fontSize: 12,
-    color: '#007AFF',
-    backgroundColor: '#F0F8FF',
+    color: "#007AFF",
+    backgroundColor: "#F0F8FF",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 5,
     marginTop: 4,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   editButton: {
     padding: 8,
   },
   permissionSection: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
   },
   permissionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#F1F3F4',
+    borderBottomColor: "#F1F3F4",
   },
   permissionText: {
     fontSize: 16,
-    color: '#2C3E50',
+    color: "#2C3E50",
   },
   switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   helpText: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: "#7F8C8D",
     marginTop: 5,
   },
   backupButton: {
-    backgroundColor: '#FF6B6B',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#FF6B6B",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
   },
   backupButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
   versionInfo: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
   },
   versionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 15,
   },
   versionLabel: {
     fontSize: 16,
-    color: '#2C3E50',
+    color: "#2C3E50",
   },
   versionValue: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#007AFF',
+    fontWeight: "600",
+    color: "#007AFF",
   },
   updateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: "#007AFF",
   },
   updateButtonText: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 5,
   },
   advancedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'white',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#E1E8ED',
+    borderColor: "#E1E8ED",
   },
   advancedItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   advancedItemText: {
     fontSize: 16,
-    color: '#2C3E50',
+    color: "#2C3E50",
     marginLeft: 12,
   },
   apiKeyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   apiKeyInput: {
     flex: 1,
@@ -664,52 +764,52 @@ const styles = StyleSheet.create({
   },
   generateButton: {
     padding: 15,
-    backgroundColor: '#F0F8FF',
+    backgroundColor: "#F0F8FF",
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: "#007AFF",
   },
   licenseInfo: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 15,
     borderRadius: 10,
     marginTop: 20,
   },
   licenseItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 10,
   },
   licenseTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#2C3E50',
+    fontWeight: "600",
+    color: "#2C3E50",
     marginLeft: 15,
   },
   licenseExpiry: {
     fontSize: 14,
-    color: '#7F8C8D',
+    color: "#7F8C8D",
     marginLeft: 15,
     marginTop: 2,
   },
   footer: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#E1E8ED',
+    borderTopColor: "#E1E8ED",
   },
   saveButton: {
-    backgroundColor: '#4CAF50',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#4CAF50",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 15,
     borderRadius: 10,
   },
   saveButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginLeft: 8,
   },
 });

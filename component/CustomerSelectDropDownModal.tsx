@@ -102,13 +102,13 @@ const CustomerSelectDropDownModal: React.FC<AddCustomerDropDownProps> = ({
         setAddCustomForm({ ...addCustomForm, KAN_GRUBU: option.title });
         break;
       case "cinsiyet":
-        setAddCustomForm({ ...addCustomForm, M_CINSIYETI: Number(option.id) });
+        setAddCustomForm({ ...addCustomForm, M_CINSIYETI: (option.id) });
         break;
       case "musteriGrubu":
         setAddCustomForm({ ...addCustomForm, GRUP_NO: option.id });
         break;
       case "meslek":
-        setAddCustomForm({ ...addCustomForm, MESLEK_NO: option.title });
+        setAddCustomForm({ ...addCustomForm, MESLEK: option.title });
     }
     onClose(); // seçince modal kapanacak
   };

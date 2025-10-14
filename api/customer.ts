@@ -5,7 +5,7 @@ import {
   SQLDataResponse,
 } from "../types/apiresponse/searchCustomers";
 import { AddCustomerFormTypeDeneme, Customer, SearchCustomerFields } from "../types/customerType";
-import { fetchSqlData } from "./generic";
+import { fetchSearchMethot } from "./generic";
 
 export async function addCustomer(
   params: Customer

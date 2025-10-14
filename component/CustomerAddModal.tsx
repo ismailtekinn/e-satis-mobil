@@ -16,9 +16,23 @@ import { AddCustomerDropDownType } from "../types/addCustomerDropDownType";
 import { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { useAddCustomerForm } from "../contex/customer/addCustomerFormContext";
 import { useBussinessContext } from "../contex/addCustomerModal/bussinessContext";
-import { addUpdateEntity } from "../api/generic";
-import { API_URL8082 } from "../constants/constant";
+import { addUpdateEntity, fetchSearchMethot } from "../api/generic";
+import {
+  API_URL8082,
+  API_URL8082_Local,
+  API_URL8082_Local2,
+  CARI_EKLE_GUNCELLE_URL,
+  MUSTERI_SORGULA_URL,
+} from "../constants/constant";
 import AlertModal from "./AlertModal";
+import { CustomerItem, DATum } from "../types/apiresponse/searchCustomers";
+import { SearchCustomerFields } from "../types/customerType";
+// import { SqlData } from "../types/apiresponse/genericResponseType";
+import {
+  mapBackendToForm,
+  mapCustomerBackendToForm,
+} from "../utils/func/formMapper";
+import { TCKimlikDogrula } from "../utils/func/tcKimlikDogrula";
 
 type Props = {
   visible: boolean;
@@ -37,42 +51,142 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
     useState<AddCustomerDropDownType>("kanGrubu");
   const { addCustomForm, setAddCustomForm } = useAddCustomerForm();
   const scrollRef = useRef<ScrollView>(null);
-  const handleChange = (key: string, value: string) => {
-    setAddCustomForm((prev) => ({ ...prev, [key]: value }));
-  };
+
   const [showFamilyDeposit, setShowFamilyDeposit] = useState(false);
+  const [searchData, setSearchData] = useState<SearchCustomerFields>({
+    WebErisimKullanici: "TRIA_TEST",
+    WebErisimSifre: "SFR57220",
+    Aranan: "A%%",
+    AramaTipi: 7,
+    MusteriKartBilgileriGetir: true,
+    DetayDataGetir: true,
+    CariBakiyeGetir: true,
+    AileBakiyesiGetir: true,
+  });
+
+  // const handleSave = async () => {
+  //   try {
+  //     console.log("handlesave fonksiyonu tetiklendi, addCustomForm: ");
+  //     const newCustomerId = 280454; // save sonucunda dönen ID
+  //     const mergedItem = await fetchCustomerById(newCustomerId);
+
+  //     console.log("response parse verisi console yazdırılıyor: ", mergedItem);
+  //     if (mergedItem) {
+  //       setAddCustomForm((prevForm) =>
+  //         mapCustomerBackendToForm(mergedItem, prevForm)
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error("Müşteri verisi çekilirken hata oluştu:", error);
+  //   }
+  // };
+
+  const formatMusteriUyarilari = (
+    uyarilar: { id: number; label: string }[]
+  ) => {
+    if (!Array.isArray(uyarilar) || uyarilar.length === 0) return "";
+    return uyarilar.map((u) => u.label.trim()).join("\r\n");
+  };
+
+  const fetchCustomerById = async (customerId: number) => {
+    // const url = `${API_URL8082_Local}MusteriSorgula`;
+    const searchDataForCustomer: SearchCustomerFields = {
+      ...searchData,
+      Aranan: String(customerId),
+      AramaTipi: 7,
+      MusteriKartBilgileriGetir: true,
+    };
+
+    const response = await fetchSearchMethot<DATum, SearchCustomerFields>(
+      MUSTERI_SORGULA_URL,
+      searchDataForCustomer
+    );
+    const firstItem = response.main.DATA?.[0] || {};
+    const secondItem = response.SQL_Data_2?.DATA?.[0] || {};
+    return { ...firstItem, ...secondItem };
+  };
+
+  const handleSave = async () => {
+    const newErrors: { [key: string]: string } = {};
+    // Müşteri adı kontrolü
+    if (!addCustomForm.CARI_ADI || addCustomForm.CARI_ADI.trim() === "") {
+      newErrors.CARI_ADI = "Müşteri adı boş bırakılamaz.";
+    }
+
+    // TC kontrolü
+    if (
+      !addCustomForm.TC_KIMLIK_NO ||
+      addCustomForm.TC_KIMLIK_NO.trim() === ""
+    ) {
+      newErrors.TC_KIMLIK_NO = "TC alanı boş bırakılamaz.";
+    } else if (!/^\d{11}$/.test(addCustomForm.TC_KIMLIK_NO)) {
+      newErrors.TC_KIMLIK_NO = "Geçersiz TC numarası!";
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const allMessages = Object.values(newErrors).join("\n");
+      setAlertMessage(allMessages);
+      setAlertModalVisible(true);
+      return;
+    }
+
+    const musterUyarilariStr = formatMusteriUyarilari(
+      addCustomForm.MusteriUyarilari || []
+    );
+
+    const formToSend = {
+      ...addCustomForm,
+      UYARI_BILGI: musterUyarilariStr,
+    };
+    // const url = `${API_URL8082_Local}CariEkleGuncelle`;
+
+    const response = await addUpdateEntity(CARI_EKLE_GUNCELLE_URL, formToSend);
+    let newCustomerId: number;
+    if (response.success) {
+      newCustomerId =
+        response.raw?.Id ||
+        JSON.parse(response.raw?.SQL_Data || "{}")?.DATA?.[0]?.ID;
+
+      const mergedItem = await fetchCustomerById(newCustomerId);
+
+      if (mergedItem) {
+        setAddCustomForm((prevForm) =>
+          mapCustomerBackendToForm(mergedItem, prevForm)
+        );
+      }
+      setAlertMessage("Müşteri kaydı başarılı bir şekilde oluşturuldu");
+      setAlertModalVisible(true);
+    } else {
+      setAlertMessage(`${response.message}`);
+      setAlertModalVisible(true);
+    }
+  };
+
   const handleTabChange = (tabId: number) => {
     setActiveTab(tabId);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  const handleSave = async () => {
-    const newErrors: { [key: string]: string } = {};
+  const handleChange = (key: string, value: string) => {
+    setAddCustomForm((prev) => ({ ...prev, [key]: value }));
 
-    if (!addCustomForm.CARI_ADI)
-      newErrors.CARI_ADI = "Müşteri adı boş bırakılamaz.";
+    setErrors((prev) => {
+      const newErrors = { ...prev };
 
-    setErrors(newErrors);
-    
-    if (Object.keys(newErrors).length > 0) {
-      return; // <-- burası eksik
-    }
+      if (key === "TC_KIMLIK_NO") {
+        if (value.length < 11) {
+          newErrors[key] = "T.C Kimlik No 11 haneli olmalı";
+        } else if (value.length === 11) {
+          const isValid = TCKimlikDogrula(value);
+          if (!isValid) newErrors[key] = "Geçersiz T.C Kimlik No";
+          else delete newErrors[key]; // geçerliyse hatayı kaldır
+        } else {
+          delete newErrors[key];
+        }
+      }
 
-    const url = `${API_URL8082}TriaRestEczane//CariEkleGuncelle`;
-    const response = await addUpdateEntity(url, addCustomForm);
-    console.log("response console yazdırılıyor",response)
-
-    if (response.success) {
-      const newCustomerId = response.raw?.Id || 
-                          JSON.parse(response.raw?.SQL_Data || "{}")?.DATA?.[0]?.ID
-                          
-      setAlertMessage("Müşteri kaydı başarılı bir şekilde oluşturuldu");
-      setAlertModalVisible(true);
-    } else {
-      console.warn("Ekleme başarısız:", response.message);
-      setAlertMessage(`${response.message}`);
-      setAlertModalVisible(true);
-    }
+      return newErrors;
+    });
   };
 
   const tabs = [
@@ -131,12 +245,18 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
               <View style={styles.fieldHalf}>
                 <Text style={styles.label}>T.C Kimlik No</Text>
                 <TextInput
-                  style={[styles.input]}
+                  style={[
+                    styles.input,
+                    errors.TC_KIMLIK_NO ? styles.inputError : null,
+                  ]}
                   value={addCustomForm.TC_KIMLIK_NO}
                   onChangeText={(t) => handleChange("TC_KIMLIK_NO", t)}
                   placeholder="11 haneli T.C No"
                   placeholderTextColor="#999"
                 />
+                {errors.TC_KIMLIK_NO && (
+                  <Text style={styles.errorText}>{errors.TC_KIMLIK_NO}</Text>
+                )}
               </View>
               <View style={styles.fieldHalf}>
                 <Text style={styles.label}>Meslek</Text>
@@ -146,15 +266,14 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   onPress={() => {
                     setKanGrubuModalVisible(true);
                     setDropDownType("meslek");
-                    // burada istediğin işlemi yapabilirsin
                   }}
                 >
                   <Text
                     style={{
-                      color: addCustomForm.MESLEK_NO ? "#000" : "#999",
+                      color: addCustomForm.MESLEK ? "#000" : "#999",
                     }}
                   >
-                    {addCustomForm.MESLEK_NO || "Meslek"}
+                    {addCustomForm.MESLEK || "Meslek"}
                   </Text>
                   <AntDesign
                     name="down"
@@ -201,12 +320,10 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
               <View style={styles.fieldHalf}>
                 <Text style={styles.label}>Yaş </Text>
                 <TextInput
-                  style={[
-                    styles.input,
-                  ]}
+                  style={[styles.input]}
                   value={addCustomForm.Yas}
                   onChangeText={(t) => handleChange("Yas", t)}
-                  placeholder="Müşteri Adı"
+                  placeholder="Yas"
                   placeholderTextColor="#999"
                 />
               </View>
@@ -226,10 +343,17 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                       mode: "date",
                       onChange: (event, date) => {
                         if (event.type === "set" && date) {
-                          handleChange(
-                            "M_DOGUM_TARIHI",
-                            date.toLocaleDateString("tr-TR")
+                          // Tarihi sadece GG.AA.YYYY formatında kaydet
+                          const formattedDate = date.toLocaleDateString(
+                            "tr-TR",
+                            {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                            }
                           );
+
+                          handleChange("M_DOGUM_TARIHI", formattedDate);
                         }
                       },
                     });
@@ -261,7 +385,11 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                       color: addCustomForm.M_CINSIYETI ? "#000" : "#999",
                     }}
                   >
-                    {addCustomForm.M_CINSIYETI || "Erkek / Kadın"}
+                    {addCustomForm.M_CINSIYETI === "0"
+                      ? "Erkek"
+                      : addCustomForm.M_CINSIYETI === "1"
+                      ? "Kadın"
+                      : "Erkek / Kadın"}
                   </Text>
                   <AntDesign
                     name="down"
@@ -314,7 +442,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                 <TextInput
                   style={styles.input}
                   value={addCustomForm.VERGI_DAIRESI}
-                  onChangeText={(t) => handleChange("vergiDairesi", t)}
+                  onChangeText={(t) => handleChange("VERGI_DAIRESI", t)}
                   placeholder="Vergi dairesi adı"
                   placeholderTextColor="#999"
                 />
@@ -327,10 +455,11 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                 <TextInput
                   style={styles.input}
                   value={addCustomForm.VERGI_NUMARASI}
-                  onChangeText={(t) => handleChange("vergiNo", t)}
+                  onChangeText={(t) => handleChange("VERGI_NUMARASI", t)}
                   keyboardType="numeric"
                   placeholder="10 haneli vergi no"
                   placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
               <View style={styles.fieldHalf}>
@@ -441,32 +570,6 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                 />
               </View>
             </View>
-
-            <View style={styles.row}>
-              <View style={styles.fieldHalf}>
-                <Text style={styles.label}>Müşteri Borcu</Text>
-                <TextInput
-                  style={styles.input}
-                  value={addCustomForm.MusteriBorcu}
-                  onChangeText={(t) => handleChange("MusteriBorcu", t)}
-                  placeholder="Müşteri Borcu"
-                  placeholderTextColor="#999"
-                />
-              </View>
-
-              <View style={styles.fieldHalf}>
-                <Text style={styles.label}>Müşteri Alacağı</Text>
-                <TextInput
-                  style={styles.input}
-                  value={addCustomForm.MusteriAlacagi}
-                  onChangeText={(t) => handleChange("MusteriAlacagi", t)}
-                  keyboardType="numeric"
-                  placeholder="Müşteri Alacağı"
-                  placeholderTextColor="#999"
-                />
-              </View>
-            </View>
-
             <View style={styles.field}>
               <Text style={styles.label}>E-mail</Text>
               <TextInput
@@ -493,6 +596,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   onChangeText={(t) => handleChange("MusteriBorcu", t)}
                   placeholder="Müşteri Borcu"
                   placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
 
@@ -505,6 +609,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   keyboardType="numeric"
                   placeholder="Müşteri Alacağı"
                   placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
             </View>
@@ -517,6 +622,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   onChangeText={(t) => handleChange("MusteriBorcu", t)}
                   placeholder="Müşteri Borcu"
                   placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
 
@@ -529,6 +635,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   keyboardType="numeric"
                   placeholder="Müşteri Alacağı"
                   placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
             </View>
@@ -547,10 +654,11 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                 <Text style={styles.label}>Fatura Senaryosu</Text>
                 <TextInput
                   style={styles.input}
-                  value={addCustomForm.MusteriBorcu}
-                  onChangeText={(t) => handleChange("MusteriBorcu", t)}
-                  placeholder="Müşteri Borcu"
+                  value={addCustomForm.E_FAT_SENARYO}
+                  onChangeText={(t) => handleChange("E_FAT_SENARYO", t)}
+                  placeholder="Fatura Senaryosu"
                   placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
 
@@ -558,10 +666,10 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                 <Text style={styles.label}>Posta Kutusu</Text>
                 <TextInput
                   style={styles.input}
-                  value={addCustomForm.MusteriAlacagi}
-                  onChangeText={(t) => handleChange("MusteriAlacagi", t)}
+                  value={addCustomForm.E_FAT_POS_KUTUSU}
+                  onChangeText={(t) => handleChange("E_FAT_POS_KUTUSU", t)}
                   keyboardType="numeric"
-                  placeholder="Müşteri Alacağı"
+                  placeholder="E-Posta Kutusu"
                   placeholderTextColor="#999"
                 />
               </View>
@@ -702,6 +810,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   onChangeText={(t) => handleChange("KART_NO", t)}
                   placeholder="KART NO"
                   placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
               <View style={styles.fieldHalf}>
@@ -712,6 +821,31 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   onChangeText={(t) => handleChange("KartAdı", t)}
                   placeholder="Kart Adı"
                   placeholderTextColor="#999"
+                  editable={false}
+                />
+              </View>
+            </View>
+            <View style={styles.row}>
+              <View style={styles.fieldHalf}>
+                <Text style={styles.label}>Kart Türü</Text>
+                <TextInput
+                  style={styles.input}
+                  value={addCustomForm.KartTuru}
+                  onChangeText={(t) => handleChange("KartTuru", t)}
+                  placeholder="Kart Türü"
+                  placeholderTextColor="#999"
+                  editable={false}
+                />
+              </View>
+              <View style={styles.fieldHalf}>
+                <Text style={styles.label}>Kart Durumu</Text>
+                <TextInput
+                  style={styles.input}
+                  value={addCustomForm.KartDurumu}
+                  onChangeText={(t) => handleChange("KartDurumu", t)}
+                  placeholder="Kart Durumu"
+                  placeholderTextColor="#999"
+                  editable={false}
                 />
               </View>
             </View>
@@ -753,13 +887,18 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                 <View style={styles.fieldHalf}>
                   <View style={styles.switchBox}>
                     <Switch
-                      value={smsGuncellemessin}
-                      onValueChange={setSmsGuncellemessin}
+                      value={addCustomForm.SMS_GONDERILMESIN === 1}
+                      onValueChange={(value) => {
+                        setAddCustomForm((prev) => ({
+                          ...prev,
+                          SMS_GONDERILMESIN: value ? 1 : 0,
+                        }));
+                      }}
                       trackColor={{ false: "#ddd", true: "#2563eb" }}
                       thumbColor="#fff"
-                      disabled={addCustomForm.Id === 0}
+                      disabled={addCustomForm.ID === 0}
                     />
-                    <Text style={styles.switchLabel}>SMS Gönderilsin</Text>
+                    <Text style={styles.switchLabel}>SMS Gönderilmesin</Text>
                   </View>
                 </View>
               </View>
@@ -799,7 +938,13 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                   }}
                 >
                   {addCustomForm.MusteriUyarilari?.map((uyari) => (
-                    <View key={uyari.id} style={styles.warningBox}>
+                    <View
+                      key={uyari.id}
+                      style={[
+                        styles.warningBox,
+                        { flexDirection: "row", alignItems: "center" },
+                      ]}
+                    >
                       <AntDesign
                         name="warning"
                         size={18}
@@ -813,6 +958,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                             flex: 1,
                             backgroundColor: "transparent",
                             padding: 0,
+                            maxHeight: 80,
                           },
                         ]}
                         onFocus={() => {
@@ -820,6 +966,8 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                             scrollRef.current?.scrollToEnd({ animated: true });
                           }, 300);
                         }}
+                        multiline={true}
+                        scrollEnabled={true}
                         value={uyari.label}
                         onChangeText={(text) => {
                           setAddCustomForm((prev) => ({
@@ -835,8 +983,49 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                         placeholder="Uyarı metni"
                         placeholderTextColor="#999"
                       />
+
+                      {/* 🗑️ Silme butonu */}
+                      <TouchableOpacity
+                        onPress={() => {
+                          setAddCustomForm((prev) => ({
+                            ...prev,
+                            MusteriUyarilari: prev.MusteriUyarilari?.filter(
+                              (item) => item.id !== uyari.id
+                            ),
+                          }));
+                        }}
+                        style={{ marginLeft: 8 }}
+                      >
+                        <AntDesign name="delete" size={20} color="#e53935" />
+                      </TouchableOpacity>
                     </View>
                   ))}
+
+                  {/* ➕ Listenin en altına ekleme butonu */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setAddCustomForm((prev) => ({
+                        ...prev,
+                        MusteriUyarilari: [
+                          ...(prev.MusteriUyarilari ?? []),
+                          { id: Date.now(), label: "" },
+                        ],
+                      }));
+                      setTimeout(() => {
+                        scrollRef.current?.scrollToEnd({ animated: true });
+                      }, 200);
+                    }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 8,
+                    }}
+                  >
+                    <AntDesign name="pluscircleo" size={20} color="#4CAF50" />
+                    <Text style={{ marginLeft: 6, color: "#4CAF50" }}>
+                      Yeni Uyarı Ekle
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               )}
             </View>
@@ -1020,8 +1209,7 @@ export default function CustomerAddModal({ visible, onClose }: Props) {
                     styles.tab,
                     activeTab === tab.id && styles.tabActive,
                     // Hatalı alan varsa tabı kırmızı yap
-                    (tab.id === 0 &&
-                      (errors.CARI_ADI )) 
+                    tab.id === 0 && errors.CARI_ADI
                       ? { borderBottomColor: "red", borderBottomWidth: 2 }
                       : {},
                   ]}
@@ -1331,4 +1519,6 @@ const styles = StyleSheet.create({
     color: "#475569",
     fontWeight: "700",
   },
+  errorText: { color: "red", marginTop: 4 },
+  inputError: { borderColor: "red" }, // hata varsa kırmızı kenarlık
 });

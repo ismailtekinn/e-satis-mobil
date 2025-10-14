@@ -2,30 +2,35 @@ import axios from "axios";
 import { Register, SignIn } from "../types/authType";
 import Constants from "expo-constants";
 import https from "https";
-import { API_URL } from "../constants/constant";
+import { API_URL, LOGIN_URL } from "../constants/constant";
+import { BackendResponse } from "../types/apiresponse/newGenericResponseType";
 
 export async function login(params: SignIn) {
   try {
-    console.log("form data backende gönderilmek üzere alındı", params);
-    const url = API_URL + 'api/auth/login';
+    // const url = LOGIN_URL + 'api/auth/login';
+    const url = LOGIN_URL;
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        phone: params.phone,
-        password: params.password,
+        ...params,
       }),
-      mode: "cors",
     });
 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || "Login failed");
     }
-    const userData = await response.json();
-    console.log("response ekrana yazdırıldı ", userData);
+    const raw = await response.json();
+    const userData: BackendResponse = Object.fromEntries(
+      Object.entries(raw).map(([k, v]) => [
+        k,
+        k.startsWith("SQL_Data") && typeof v === "string" ? JSON.parse(v) : v,
+      ])
+    ) as BackendResponse;
     return userData;
   } catch (error) {
     console.error(error);
@@ -33,10 +38,11 @@ export async function login(params: SignIn) {
   }
 }
 
+
 export async function register(params: Register) {
   console.log("Register data verileri ekrana yazdırıldı", params);
   try {
-    const url = API_URL + 'api/auth/register';
+    const url = API_URL + "api/auth/register";
     console.log("kayıt verileri console yazdırıldı");
     const response = await fetch(url, {
       method: "POST",

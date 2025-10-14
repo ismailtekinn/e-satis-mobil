@@ -15,6 +15,7 @@ import { RootStackParamList } from "../types";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useKullanici } from "../contex/kullaniciContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -39,6 +40,7 @@ const MainPage = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const { userData, handleLogout } = useKullanici();
 
   useEffect(() => {
     Animated.parallel([
