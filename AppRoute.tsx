@@ -39,52 +39,93 @@ import { useKullanici } from "./contex/kullaniciContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAutoLogin } from "./contex/settings/autoLoginContext";
 import { login } from "./api/auth";
-import { AutoLoginOption } from "./types/enums/settings";
 import TriaSplashScreen from "./screens/TriaSplashScreen";
+import { AutoLoginOption } from "./types/enums/settings";
+import { BackendResponse } from "./types/apiresponse/newGenericResponseType";
 
 const Stack = createStackNavigator();
 
 const AppRoute: React.FC = () => {
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
-  const { userData, setUserData } = useKullanici()!;
-  const { autoLogin } = useAutoLogin();
+  const { userData, setUserData } = useKullanici();
   const { handleLogin } = useKullanici();
   const [isReady, setIsReady] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAutoLogin, setIsAutoLogin] = useState<boolean>(false);
   const [showSplash, setShowSplash] = useState(true);
+  const [shouldShowMainPages, setShouldShowMainPages] = useState(false);
 
-  useEffect(() => {
-    const tryAutoLogin = async () => {
-      setIsCheckingAuth(true);
+  const renderCount = useRef(0);
 
-      if (autoLogin === AutoLoginOption.Evet) {
-        const storedUsername = await AsyncStorage.getItem("username");
-        const storedPassword = await AsyncStorage.getItem("password");
+  // const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-        if (storedUsername && storedPassword) {
-          try {
-            const response = await login({
-              KullaniciKodu: storedUsername,
-              Sifre: storedPassword,
-            });
-            await handleLogin(response);
-          } catch (err) {
-            console.error("Otomatik login hatası:", err);
-            setUserData(undefined);
-          }
-        } else {
-          setUserData(undefined);
-        }
+  // const tryAutoLogin = async () => {
+  //   setIsCheckingAuth(true);
+
+  //   const storedAutoLogin = await AsyncStorage.getItem("autoLogin");
+  //   console.log("autologin console yazdırılıyor:", storedAutoLogin);
+  //   setIsAutoLogin(storedAutoLogin === AutoLoginOption.Evet.toString());
+  //   if (userData) {
+  //     setIsCheckingAuth(false);
+  //     setIsReady(true);
+  //     return;
+  //   }
+  //   if (!isAutoLogin) {
+  //     setUserData(undefined);
+  //     await AsyncStorage.setItem("userData", "");
+  //   }
+
+  //   if (isAutoLogin) {
+  //     const storedUsername = await AsyncStorage.getItem("username");
+  //     const storedPassword = await AsyncStorage.getItem("password");
+
+  //     if (isAutoLogin && storedUsername && storedPassword) {
+  //       try {
+  //         const response = await login({
+  //           KullaniciKodu: storedUsername,
+  //           Sifre: storedPassword,
+  //         });
+  //         await handleLogin(response);
+  //         // setUserData(undefined);
+  //       } catch (err) {
+  //         console.error("Otomatik login hatası:", err);
+  //         setUserData(undefined);
+  //       }
+  //     }
+  //   }
+  //   setIsCheckingAuth(false);
+  //   setIsReady(true);
+  // };
+
+  const tryAutoLogin = async () => {
+    try {
+      const storedAutoLogin = await AsyncStorage.getItem("autoLogin");
+
+      const storedUsername = await AsyncStorage.getItem("username");
+      const storedPassword = await AsyncStorage.getItem("password");
+
+      if (!storedUsername || !storedPassword) {
+        console.error("Kullanıcı adı veya şifre bulunamadı!");
+        return;
+      }
+      if (storedAutoLogin === AutoLoginOption.Evet.toString()) {
+        const response = await login({
+          KullaniciKodu: storedUsername,
+          Sifre: storedPassword,
+        });
+        await handleLogin(response);
       } else {
         setUserData(undefined);
+        await AsyncStorage.setItem("userData", "");
       }
-
-      setIsCheckingAuth(false);
+    } catch (err) {
+    } finally {
       setIsReady(true);
-    };
+    }
+  };
 
+  useEffect(() => {
     tryAutoLogin();
-  }, [autoLogin]);
+  }, []); // userData'yı dependency'den kaldırdım
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -93,14 +134,10 @@ const AppRoute: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, []);
-  if (!isReady || isCheckingAuth || showSplash) {
+
+  if (!isReady || showSplash) {
     return <TriaSplashScreen />;
   }
-
-  console.log(
-    "app route içinde autologin state i console yazdırılıyor: ",
-    autoLogin
-  );
 
   return (
     <NavigationContainer ref={navigationRef}>

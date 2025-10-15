@@ -8,19 +8,19 @@ import { AutoLoginProvider } from "../contex/settings/autoLoginContext";
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AutoLoginProvider>
-      <AlertProvider>
-        {/* <BussinessProvider> */}
-        <KullaniciProvider>
+    <AlertProvider>
+      {/* <BussinessProvider> */}
+      <KullaniciProvider>
+        <AutoLoginProvider>
           <AddCustomerFormProvider>
             <SelectedCustomerProvider>
               <AppInner>{children}</AppInner>
             </SelectedCustomerProvider>
           </AddCustomerFormProvider>
-        </KullaniciProvider>
-        {/* </BussinessProvider> */}
-      </AlertProvider>
-    </AutoLoginProvider>
+        </AutoLoginProvider>
+      </KullaniciProvider>
+      {/* </BussinessProvider> */}
+    </AlertProvider>
   );
 };
 

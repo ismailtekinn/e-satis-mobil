@@ -45,6 +45,7 @@ const SettingsScreen = () => {
     dbPassword: "",
     autoBackup: true,
     version: "1.0.0",
+    autoLogin: selectedValue,
     apiKey: "sk-1234567890abcdef",
     licenseInfo: "Premium License",
   });

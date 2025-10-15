@@ -6,7 +6,11 @@ import React, {
   useContext,
 } from "react";
 import { fetchSearchMethot } from "../../api/generic";
-import {  CARI_GROUP_SORGULA_URL, MUSTERI_SORGULA_URL } from "../../constants/constant";
+import {
+  CARI_GROUP_SORGULA_URL,
+  MESLEK_SORGULA_URL,
+  MUSTERI_SORGULA_URL,
+} from "../../constants/constant";
 import { SqlData } from "../../types/apiresponse/newGenericResponseType";
 
 export interface Bussiness {
@@ -35,7 +39,11 @@ export const BussinessProvider = ({ children }: { children: ReactNode }) => {
   const loadBussiness = async () => {
     try {
       // const url = `${API_URL8082}TriaRestEczane/MeslekSorgula`;
-      const response = await fetchSearchMethot<Bussiness, {}>(MUSTERI_SORGULA_URL, {});
+      const response = await fetchSearchMethot<Bussiness, {}>(
+        MESLEK_SORGULA_URL,
+        {}
+      );
+
       const mainData: SqlData<Bussiness> = response.main;
       setBussinessData(mainData.DATA);
     } catch (err) {
@@ -43,6 +51,8 @@ export const BussinessProvider = ({ children }: { children: ReactNode }) => {
       setBussinessData(null);
     }
   };
+
+
 
   const loadCustomerGroup = async () => {
     try {
@@ -55,7 +65,7 @@ export const BussinessProvider = ({ children }: { children: ReactNode }) => {
 
       setCustomerData(mainData.DATA);
     } catch (err) {
-      console.error("Meslek verisi alınamadı:", err);
+      console.error("cari grup  verisi alınamadı:", err);
       setCustomerData(null);
     }
   };

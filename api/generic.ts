@@ -70,16 +70,12 @@ export async function fetchSearchMethot<T, TParams extends object>(
     body: JSON.stringify(params),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(errorData?.ErrorMessage || "API isteği başarısız oldu.");
-  }
-
   const data: BackendResponse = await response.json();
-  if (!data.SQL_Data) throw new Error("SQL_Data alanı boş döndü.");
-
+  if (!response.ok) {
+    throw new Error(data?.ErrorMessage || "API isteği başarısız oldu.");
+  }
+  if (!data.SQL_Data ||data.SQL_Data === "") throw new Error("SQL_Data alanı boş döndü.");
   const result: any = { main: safeJSONParse<SqlData<T>>(data.SQL_Data) };
-
   for (let i = 2; i <= 10; i++) {
     const key = `SQL_Data_${i}`;
     result[key] = data[key as keyof BackendResponse]

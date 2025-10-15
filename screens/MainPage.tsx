@@ -91,11 +91,15 @@ const MainPage = () => {
     },
   ];
 
+  // console.log("userdata main sayfasında  console yazdırılıyor: ", userData)
   const handleMenuPress = (menuId: number, title: string): void => {
     if (menuId === 1) {
       navigation.navigate("SalesScreen");
     } else if (menuId === 2) {
       navigation.navigate("SettingsScreen");
+    }
+    else if (menuId === 3) {
+      handleLogout()
     }
     console.log(`${title} menüsüne tıklandı`);
   };

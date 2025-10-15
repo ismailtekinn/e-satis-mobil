@@ -50,7 +50,7 @@ const LoginScreen: React.FC = () => {
       await handleLogin(response);
       await AsyncStorage.setItem("username", formData.KullaniciKodu);
       await AsyncStorage.setItem("password", formData.Sifre);
-      navigation.navigate("MainPage");
+      // navigation.navigate("MainPage");
     } catch (err) {
       console.error("Login hatası:", err);
       Alert.alert("Login Failed", "Giriş sırasında bir hata oluştu.");

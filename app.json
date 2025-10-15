@@ -6,11 +6,14 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/triaslidedeneme.png",
       "resizeMode": "cover",
       "backgroundColor": "#fafbfb"
     },
-    "ios": {
+    "ios": {    "splash": {
+      "image": "./assets/e-market.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#fafbfb"
+    },
       "supportsTablet": true
     },
     "android": {

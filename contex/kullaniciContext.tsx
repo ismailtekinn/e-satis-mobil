@@ -24,7 +24,7 @@ export const KullaniciProvider: React.FC<{ children: React.ReactNode }> = ({
     const loadStoredData = async () => {
       try {
         const storedUser = await AsyncStorage.getItem("userData");
-        if (storedUser) {
+        if (storedUser && storedUser !== "") {
           setUserData(JSON.parse(storedUser));
         }
       } catch (err) {
@@ -45,6 +45,7 @@ export const KullaniciProvider: React.FC<{ children: React.ReactNode }> = ({
       ) as BackendResponse;
 
       setUserData(parsedData);
+      // await AsyncStorage.setItem("autoLogin", "Evet");
       await AsyncStorage.setItem("userData", JSON.stringify(parsedData));
     } catch (err) {
       console.error("Login failed:", err);
