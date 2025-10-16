@@ -1,119 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   FlatList,
-//   StyleSheet,
-// } from "react-native";
-// import { AddProduct, MinimalProduct, Product } from "../types/productType";
-// import { useNavigation, useRoute } from "@react-navigation/native";
-// import { StackNavigationProp } from "@react-navigation/stack";
-
-// import { getProductList } from "../api/product";
-// import { useSelectedProduct } from "../contex/selectedProductContext";
-// import { RootStackParamList } from "../types";
-
-// const CustomerSelect = () => {
-//   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.searchContainer}>
-//         <TextInput
-//           style={styles.searchInput}
-//           placeholder="Ara"
-//         />
-//       </View>
-
-//       <TouchableOpacity
-//         style={styles.addButton}
-//         onPress={() => navigation.navigate("AddNew")}
-//       >
-//         <Text style={styles.addButtonText}>+ Müşteri Ekle</Text>
-//       </TouchableOpacity>
-
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: "#fff",
-//   },
-//   searchContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     marginBottom: 16,
-//   },
-//   searchInput: {
-//     flex: 1,
-//     padding: 8,
-//     borderWidth: 1,
-//     borderColor: "#ccc",
-//     borderRadius: 8,
-//     marginRight: 8,
-//     fontSize: 16,
-//   },
-//   clearText: {
-//     fontSize: 18,
-//     color: "#555",
-//   },
-//   addButton: {
-//     backgroundColor: "#007bff",
-//     padding: 12,
-//     borderRadius: 8,
-//     alignItems: "center",
-//     marginBottom: 16,
-//   },
-//   addButtonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "bold",
-//   },
-//   productList: {
-//     marginTop: 8,
-//   },
-//   productContainer: {
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     alignItems: "center",
-//     padding: 12,
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//     borderRadius: 8,
-//     marginBottom: 8,
-//   },
-//   productInfo: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//   },
-//   productIcon: {
-//     width: 32,
-//     height: 32,
-//     borderRadius: 16,
-//     backgroundColor: "#f8f9fa",
-//     justifyContent: "center",
-//     alignItems: "center",
-//     marginRight: 8,
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//   },
-//   productName: {
-//     fontSize: 16,
-//   },
-//   quantityBox: {
-//     padding: 6,
-//     borderRadius: 8,
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//   },
-// });
-
-// export default CustomerSelect;
 import React from "react";
 import {
   View,
@@ -123,23 +7,71 @@ import {
   FlatList,
   StyleSheet,
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { SearchOptionTitles, SearchOptionValues } from "../types/enums/tria";
 
 type CustomerSelectProps = {
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
-  selectedOption: string;
-  setSelectedOption: (option: string) => void;
+  selectedOption: {
+    title: string;
+    value: SearchOptionValues;
+  };
+  setSelectedOption: (option: {
+    title: string;
+    value: SearchOptionValues;
+  }) => void;
 };
 
 const searchOptions = [
-  { id: "1", title: "Müşteri Adına Göre", icon: "user" },
-  { id: "2", title: "Müşteri Soyadına Göre", icon: "contacts" },
-  { id: "3", title: "T.C. Numarasına Göre", icon: "idcard" },
-  { id: "4", title: "Kart Numarasına Göre Ara", icon: "creditcard" },
-  { id: "5", title: "GSM'e Göre Ara", icon: "mobile1" },
-  { id: "6", title: "Vergi Dairesine Göre Ara", icon: "bank" },
-  { id: "7", title: "Vergi Numarasına Göre Ara", icon: "filetext1" },
+  {
+    id: "8",
+    title: SearchOptionTitles.AdTcKartNo,
+    icon: "list",
+    value: SearchOptionValues.AdTcKartNo,
+  },
+  {
+    id: "1",
+    title: SearchOptionTitles.MusteriAdi,
+    icon: "person",
+    value: SearchOptionValues.MusteriAdi,
+  },
+  {
+    id: "2",
+    title: SearchOptionTitles.MusteriSoyadi,
+    icon: "people",
+    value: SearchOptionValues.MusteriSoyadi,
+  },
+  {
+    id: "3",
+    title: SearchOptionTitles.TcNumarasi,
+    icon: "card",
+    value: SearchOptionValues.TcNumarasi,
+  },
+  {
+    id: "4",
+    title: SearchOptionTitles.KartNumarasi,
+    icon: "card",
+    value: SearchOptionValues.KartNumarasi,
+  },
+  {
+    id: "5",
+    title: SearchOptionTitles.Gsm,
+    icon: "call",
+    value: SearchOptionValues.Gsm,
+  },
+  {
+    id: "6",
+    title: SearchOptionTitles.VergiDairesi,
+    icon: "business",
+    value: SearchOptionValues.VergiDairesi,
+  },
+  {
+    id: "7",
+    title: SearchOptionTitles.VergiNumarasi,
+    icon: "document-text",
+    value: SearchOptionValues.VergiNumarasi,
+  },
 ];
 
 const CustomerSelect: React.FC<CustomerSelectProps> = ({
@@ -148,7 +80,10 @@ const CustomerSelect: React.FC<CustomerSelectProps> = ({
   selectedOption,
   setSelectedOption,
 }) => {
-  const handleSelectOption = (option: string) => {
+  const handleSelectOption = (option: {
+    title: string;
+    value: SearchOptionValues;
+  }) => {
     setSelectedOption(option);
     setModalVisible(false);
   };
@@ -164,7 +99,9 @@ const CustomerSelect: React.FC<CustomerSelectProps> = ({
           isSelected && styles.selectedItem,
           isLast && styles.lastItem,
         ]}
-        onPress={() => handleSelectOption(item.title)}
+        onPress={() =>
+          handleSelectOption({ title: item.title, value: item.value })
+        }
         activeOpacity={0.7}
       >
         <View style={styles.optionContent}>
@@ -174,8 +111,14 @@ const CustomerSelect: React.FC<CustomerSelectProps> = ({
               isSelected && styles.selectedIconContainer,
             ]}
           >
-            <AntDesign
+            {/* <AntDesign
               name={item.icon as any}
+              size={18}
+              color={isSelected ? "#fff" : "#3498db"}
+            /> */}
+
+            <Ionicons
+              name={item.icon}
               size={18}
               color={isSelected ? "#fff" : "#3498db"}
             />
@@ -259,7 +202,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#3498db",
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 26,
   },
   modalTitle: {
     fontSize: 18,
@@ -285,7 +228,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   optionsList: {
-    // maxHeight: 320,
+    maxHeight: 320,
   },
   optionItem: {
     borderBottomWidth: 1,

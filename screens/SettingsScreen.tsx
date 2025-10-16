@@ -9,6 +9,7 @@ import {
   Switch,
   Alert,
   Dimensions,
+  Button,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -220,7 +221,48 @@ const SettingsScreen = () => {
               />
             </View>
 
-            <View style={styles.formGroup}>
+            {/* <View style={styles.formGroup}>
+              <Text style={styles.label}>Yazıcı Portu</Text>
+              <TextInput
+                style={styles.input}
+                value={settings.dbUser}
+                onChangeText={(text) =>
+                  setSettings({ ...settings, dbUser: text })
+                }
+                placeholder="Kullanıcı adı"
+              />
+            </View> */}
+
+            <View style={styles.row}>
+              <View style={styles.fieldHalf}>
+                <Text style={styles.label}>Yazıcı Portu</Text>
+                <TextInput
+                  style={[styles.input,{maxHeight: 55,}]}
+                  placeholder="Yazıcı Portunu"
+                  placeholderTextColor="#999"
+                />
+              </View>
+              <View style={styles.fieldHalf}>
+                <Text style={styles.label}></Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    styles.testButtonText,
+                    {
+                      backgroundColor: "#007AFF",
+                      color: "white",
+                      textAlign: "center",
+      
+                    },
+                  ]}
+                  value={"Yazıcıyı Test Et"}
+                  placeholderTextColor="white"
+                  editable={false}
+                />
+              </View>
+            </View>
+
+            {/* <View style={styles.formGroup}>
               <Text style={styles.label}>DB Kullanıcı Adı</Text>
               <TextInput
                 style={styles.input}
@@ -243,7 +285,7 @@ const SettingsScreen = () => {
                 placeholder="Şifre"
                 secureTextEntry
               />
-            </View>
+            </View> */}
 
             <TouchableOpacity
               style={styles.testButton}
@@ -507,6 +549,15 @@ const styles = StyleSheet.create({
   },
   tabContent: {
     padding: 20,
+  },
+
+  row: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 16,
+  },
+  fieldHalf: {
+    flex: 1,
   },
   sectionTitle: {
     fontSize: 24,

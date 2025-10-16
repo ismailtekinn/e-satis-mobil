@@ -16,3 +16,26 @@ export enum MüşteriAramaTipi {
   VergiDairesi = 6,
   CariId = 7,
 }
+
+export enum SearchOptionTitles {
+  AdTcKartNo = "Ad & T.C & Kart No",
+  MusteriAdi = "Müşteri Adına Göre",
+  MusteriSoyadi = "Müşteri Soyadına Göre",
+  TcNumarasi = "T.C. Numarasına Göre",
+  KartNumarasi = "Kart Numarasına Göre Ara",
+  Gsm = "GSM'e Göre Ara",
+  VergiDairesi = "Vergi Dairesine Göre Ara",
+  VergiNumarasi = "Vergi Numarasına Göre Ara",
+}
+
+
+export enum SearchOptionValues {
+  AdTcKartNo = 7,
+  MusteriAdi = 0,
+  MusteriSoyadi = 1,
+  TcNumarasi = 2,
+  KartNumarasi = 3,
+  Gsm = 4,
+  VergiDairesi = 5,
+  VergiNumarasi = 6,
+}

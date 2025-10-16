@@ -14,7 +14,7 @@ export interface SelectedCustomer {
 export interface SearchCustomerFields {
   WebErisimKullanici: string;
   WebErisimSifre: string;
-  Aranan: string;
+  Aranan: string ;
   AramaTipi: number;
   Baslangic?: number;
   Adet?: number;

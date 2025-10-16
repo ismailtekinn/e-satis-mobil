@@ -25,7 +25,11 @@ import { useSelectedCustomer } from "../contex/selectedCustomerContex";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
-import { MüşteriAramaTipi } from "../types/enums/tria";
+import {
+  MüşteriAramaTipi,
+  SearchOptionTitles,
+  SearchOptionValues,
+} from "../types/enums/tria";
 import AlertModal from "../component/AlertModal";
 import CustomerSelectModal from "../component/CustomerAddModal";
 import { use } from "i18next";
@@ -42,7 +46,14 @@ const CustomerSearchScreen: React.FC = () => {
   // const [filtered, setFiltered] = useState<CustomerItem[]>([]);
   const [filtered, setFiltered] = useState<DATum[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("Müşteri Adına Göre");
+  // const [selectedOption, setSelectedOption] = useState("Müşteri Adına Göre");
+  const [selectedOption, setSelectedOption] = useState<{
+    title: string;
+    value: SearchOptionValues;
+  }>({
+    title: "Müşteri Adına Göre",
+    value: SearchOptionValues.MusteriAdi,
+  });
   const { selectedCustomer, setSelectedCustomer } = useSelectedCustomer();
   const [alertModalVisible, setAlertModalVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -59,22 +70,6 @@ const CustomerSearchScreen: React.FC = () => {
     Adet: 100,
     DetayDataGetir: true,
   });
-
-  //   const handleSearch = (text: string) => {
-  //     setSearch(text);
-  //     if (text === "") setFiltered([]);
-  //     else {
-  //       setFiltered((prev) =>
-  //         prev.filter(
-  //           (item) =>
-  //             item.MUSTERI_ADI_SOYADI.toLowerCase().includes(
-  //               text.toLowerCase()
-  //             ) || item.TC_KIMLIK_NO.includes(text)
-  //         )
-  //       );
-  //     }
-  //   };
-
   const handleSelectCustomer = (customer: CustomerItem) => {
     Keyboard.dismiss();
 
@@ -86,30 +81,36 @@ const CustomerSearchScreen: React.FC = () => {
     });
     navigation.goBack();
   };
-  const handleSelectOption = () => {
-    if (selectedOption === "Müşteri Adına,Tc,Vergi Noya Göre") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 999 }));
-    } else if (selectedOption === "Müşteri Adına Göre") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 0 }));
-    } else if (selectedOption === "Müşteri Soyadına Göre") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 1 }));
-    } else if (selectedOption === "Kart Numarasına Göre Ara") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 2 }));
-    } else if (selectedOption === "T.C. Numarasına Göre Ara") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 3 }));
-    } else if (selectedOption === "GSM'e Göre Ara") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 4 }));
-    } else if (selectedOption === "Vergi Numarasına Göre Ara") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 5 }));
-    } else if (selectedOption === "Vergi Dairesine Göre Ara") {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 6 }));
+  const handleSelectOption = async () => {
+    let aramaTipi = 0; // default
+
+    if (selectedOption.value === 7) {
+      // Ad & T.C & Kart No özel kontrolleri
+      if (searchData.Aranan.length === 11) {
+        aramaTipi = 3;
+      } else if (searchData.Aranan.length === 10) {
+        aramaTipi = 2;
+      } else if (isNaN(Number(searchData.Aranan))) {
+        aramaTipi = 0;
+      } else {
+        setAlertMessage("Girilen ifade hiçbir arama parametresiyle uyuşmuyor");
+        setAlertModalVisible(true);
+        return; // hata durumunda state güncelleme yapma
+      }
     } else {
-      setSearchData((prev) => ({ ...prev, AramaTipi: 0 })); // default
+      // Diğer seçeneklerde direkt enum değerini kullan
+      aramaTipi = selectedOption.value;
     }
+
+    // Tek bir yerde state güncelle
+    setSearchData((prev) => ({
+      ...prev,
+      AramaTipi: aramaTipi,
+    }));
   };
   useEffect(() => {
     handleSelectOption();
-  }, [selectedOption]);
+  }, [selectedOption, searchData.Aranan]);
 
   const handleCustomerSearch = async () => {
     try {
@@ -128,12 +129,6 @@ const CustomerSearchScreen: React.FC = () => {
       console.error("Müşteri arama hatası:", error);
     }
   };
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setIsBlinking((prev) => !prev);
-  //   }, 600); // yarım saniyede bir değiştir
-  //   return () => clearInterval(interval);
-  // }, [filtered]);
 
   const renderItem: ListRenderItem<DATum> = ({ item }) => (
     <ScrollView
@@ -217,7 +212,7 @@ const CustomerSearchScreen: React.FC = () => {
               setSearch(text);
               setSearchData((prev) => ({
                 ...prev,
-                Aranan: text ? `${text}%` : "%%",
+                Aranan: text,
               }));
               if (!text) {
                 setFiltered([]);
@@ -229,7 +224,10 @@ const CustomerSearchScreen: React.FC = () => {
           />
           {search.length > 0 && (
             <TouchableOpacity
-              onPress={() => setSearch("")}
+              onPress={() => {
+                setSearch("");
+                setFiltered([]);
+              }}
               style={styles.clearButton}
             >
               <AntDesign name="closecircle" size={16} color="#999" />
@@ -256,7 +254,7 @@ const CustomerSearchScreen: React.FC = () => {
               style={[styles.buttonText, { fontSize: 11 }]}
               numberOfLines={2}
             >
-              {selectedOption}
+              {selectedOption.title}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
