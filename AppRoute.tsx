@@ -56,58 +56,49 @@ const AppRoute: React.FC = () => {
 
   const renderCount = useRef(0);
 
-  // const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
   // const tryAutoLogin = async () => {
-  //   setIsCheckingAuth(true);
+  //   try {
+  //     const storedAutoLogin = await AsyncStorage.getItem("autoLogin");
 
-  //   const storedAutoLogin = await AsyncStorage.getItem("autoLogin");
-  //   console.log("autologin console yazdırılıyor:", storedAutoLogin);
-  //   setIsAutoLogin(storedAutoLogin === AutoLoginOption.Evet.toString());
-  //   if (userData) {
-  //     setIsCheckingAuth(false);
-  //     setIsReady(true);
-  //     return;
-  //   }
-  //   if (!isAutoLogin) {
-  //     setUserData(undefined);
-  //     await AsyncStorage.setItem("userData", "");
-  //   }
-
-  //   if (isAutoLogin) {
   //     const storedUsername = await AsyncStorage.getItem("username");
   //     const storedPassword = await AsyncStorage.getItem("password");
 
-  //     if (isAutoLogin && storedUsername && storedPassword) {
-  //       try {
-  //         const response = await login({
-  //           KullaniciKodu: storedUsername,
-  //           Sifre: storedPassword,
-  //         });
-  //         await handleLogin(response);
-  //         // setUserData(undefined);
-  //       } catch (err) {
-  //         console.error("Otomatik login hatası:", err);
-  //         setUserData(undefined);
-  //       }
+  //     if ((!storedUsername || !storedPassword) ) {
+  //       console.error("Kullanıcı adı veya şifre bulunamadı!");
+  //       return;
   //     }
-  //   }
-  //   setIsCheckingAuth(false);
-  //   setIsReady(true);
-  // };
 
+  //     if (storedAutoLogin === AutoLoginOption.Evet.toString()) {
+  //       const response = await login({
+  //         KullaniciKodu: storedUsername,
+  //         Sifre: storedPassword,
+  //       });
+  //       await handleLogin(response);
+  //     } else {
+  //       setUserData(undefined);
+  //       await AsyncStorage.setItem("userData", "");
+  //     }
+  //   } catch (err) {
+  //   } finally {
+  //     setIsReady(true);
+  //   }
+  // };
   const tryAutoLogin = async () => {
     try {
       const storedAutoLogin = await AsyncStorage.getItem("autoLogin");
 
       const storedUsername = await AsyncStorage.getItem("username");
       const storedPassword = await AsyncStorage.getItem("password");
-
-      if (!storedUsername || !storedPassword) {
+      if ((!storedUsername || !storedPassword) && !!userData) {
         console.error("Kullanıcı adı veya şifre bulunamadı!");
         return;
       }
-      if (storedAutoLogin === AutoLoginOption.Evet.toString()) {
+
+      if (
+        storedAutoLogin === AutoLoginOption.Evet.toString() &&
+        storedUsername &&
+        storedPassword
+      ) {
         const response = await login({
           KullaniciKodu: storedUsername,
           Sifre: storedPassword,
@@ -142,7 +133,7 @@ const AppRoute: React.FC = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <SafeAreaView style={{ flex: 1, paddingTop: 30 }}>
-        <Stack.Navigator screenOptions={{ animationEnabled: false }}>
+        <Stack.Navigator screenOptions={{ animationEnabled: true }}>
           {userData ? (
             <>
               <Stack.Screen

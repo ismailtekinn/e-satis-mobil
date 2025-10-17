@@ -9,7 +9,8 @@ export const API_URL8082_Local2 = "http://192.168.0.129:8082/";
 export const MUSTERI_SORGULA_URL = `${API_URL8082_Local}MusteriSorgula`;
 export const CARI_EKLE_GUNCELLE_URL = `${API_URL8082_Local}CariEkleGuncelle`;
 // export const CARI_GROUP_SORGULA_URL = `${API_URL8082_Local}TriaRestEczane/CariGrupSorgula`;
-export const LOGIN_URL = `${API_URL8082_Local}/KullaniciSorgula`;
+// export const LOGIN_URL = `${API_URL8082_Local}/KullaniciSorgula`;
+export const LOGIN_URL = `${API_URL101}TriaRestEczane/KullaniciSorgula`;
 export const MESLEK_SORGULA_URL = `${API_URL8082_Local}/MeslekSorgula`;
 export const CARI_GROUP_SORGULA_URL = `${API_URL8082_Local}/CariGrupSorgula`;
                             

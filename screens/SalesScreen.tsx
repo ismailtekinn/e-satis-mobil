@@ -31,7 +31,10 @@ import { useFileType } from "../contex/fileTypeContext";
 import { useSales } from "../contex/SalesContext";
 import SalesScreenSummaryBox from "../component/SalesScreenSummaryBox";
 import { searchProduct } from "../api/product";
-import { ProductDataItem, SQLDataParsed } from "../types/apiresponse/searchProduct";
+import {
+  ProductDataItem,
+  SQLDataParsed,
+} from "../types/apiresponse/searchProduct";
 import SalesScreenSearchArea from "../component/SalesScreenSearchArea";
 import { SearchProductFields } from "../types/productType";
 import { useSalesCancel } from "../contex/salesCancelContext";
@@ -200,8 +203,8 @@ const SalesScreen = () => {
   // const [selectedSale, setSelectedSales] =
   //   useState<SaleItemDeneme[]>(sampleProductsDeneme);
   const { selectedSale, setSelectedSales, summary, setSummary } = useSales();
-    const { selectedCustomer, setSelectedCustomer } = useSelectedCustomer();
-  
+  const { selectedCustomer, setSelectedCustomer } = useSelectedCustomer();
+
   const [selectedIndex, setSelectedIndex] = useState<number | null>(
     selectedSale.length > 0 ? selectedSale.length - 1 : null
   );
@@ -485,11 +488,37 @@ const SalesScreen = () => {
           <BarCodeScanResult
             onBarcodeScanned={(data) => {
               setIsScannerVisible(false);
-              setSearchText(String(data));
+              setSearchData((prev) => ({
+                ...prev, // önceki alanları koru
+                Aranan: data, // sadece Aranan alanını güncelle
+              }));
             }}
             onClose={() => setIsScannerVisible(false)}
           />
         )}
+
+        {/* {isScannerVisible && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9999, // tüm diğer ekranların üstünde
+              elevation: 9999, // Android için
+              backgroundColor: "black", // opsiyonel, kamera arka planı görünmesin
+            }}
+          >
+            <BarCodeScanResult
+              onBarcodeScanned={(data) => {
+                setIsScannerVisible(false);
+                setSearchText(String(data));
+              }}
+              onClose={() => setIsScannerVisible(false)}
+            />
+          </View>
+        )} */}
 
         {/* seçilen ürünlerin listelendiği kısım */}
         <View
