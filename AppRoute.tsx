@@ -102,12 +102,16 @@ const AppRoute: React.FC = () => {
 
       const storedUsername = await AsyncStorage.getItem("username");
       const storedPassword = await AsyncStorage.getItem("password");
-
-      if (!storedUsername || !storedPassword) {
+      if ((!storedUsername || !storedPassword) && !!userData) {
         console.error("Kullanıcı adı veya şifre bulunamadı!");
         return;
       }
-      if (storedAutoLogin === AutoLoginOption.Evet.toString()) {
+
+      if (
+        storedAutoLogin === AutoLoginOption.Evet.toString() &&
+        storedUsername &&
+        storedPassword
+      ) {
         const response = await login({
           KullaniciKodu: storedUsername,
           Sifre: storedPassword,
@@ -142,7 +146,7 @@ const AppRoute: React.FC = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <SafeAreaView style={{ flex: 1, paddingTop: 30 }}>
-        <Stack.Navigator screenOptions={{ animationEnabled: false }}>
+        <Stack.Navigator screenOptions={{ animationEnabled: true }}>
           {userData ? (
             <>
               <Stack.Screen

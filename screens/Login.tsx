@@ -24,6 +24,7 @@ import { RootStackParamList } from "../types";
 import { useKullanici } from "../contex/kullaniciContext";
 import { useAutoLogin } from "../contex/settings/autoLoginContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import AlertModal from "../component/AlertModal";
 
 // import { useKullanici } from "../contex/kullaniciContext";
 
@@ -42,6 +43,9 @@ const LoginScreen: React.FC = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const { handleLogin } = useKullanici();
   const { autoLogin, setAutoLogin } = useAutoLogin();
+  const [alertModalVisible, setAlertModalVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [allertTtile, setAlertTitle] = useState("");
 
   const handleSubmit = async () => {
     try {
@@ -50,10 +54,13 @@ const LoginScreen: React.FC = () => {
       await handleLogin(response);
       await AsyncStorage.setItem("username", formData.KullaniciKodu);
       await AsyncStorage.setItem("password", formData.Sifre);
-      // navigation.navigate("MainPage");
-    } catch (err) {
-      console.error("Login hatası:", err);
-      Alert.alert("Login Failed", "Giriş sırasında bir hata oluştu.");
+      navigation.navigate("MainPage");
+    } catch (err: any) {
+      // console.error("Login hatası:", err?.message);
+      // Alert.alert("Login Failed", "Giriş sırasında bir hata oluştu.");
+      setAlertTitle(err.title);
+      setAlertMessage(err.message);
+      setAlertModalVisible(true);
     }
   };
   const handleChange = (name: keyof SignIn, value: string): void => {
@@ -256,6 +263,13 @@ const LoginScreen: React.FC = () => {
                   Tercih Bilişim Tüm Hakları Saklıdır
                 </Text>
               </View>
+
+              <AlertModal
+                visible={alertModalVisible}
+                message={alertMessage}
+                title={allertTtile}
+                onClose={() => setAlertModalVisible(false)}
+              />
             </View>
           </View>
         </ScrollView>
