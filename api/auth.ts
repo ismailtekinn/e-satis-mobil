@@ -40,8 +40,10 @@ import { BackendResponse } from "../types/apiresponse/newGenericResponseType";
 
 export async function login(params: SignIn) {
   try {
+    console.log("login mthodu çağrıldı ")
     const url = LOGIN_URL;
-    const timeout = 20000; // test için kısa süre
+    // const url = "http://192.168.1.172:44342/KullaniciSorgula";
+    const timeout = 20000000; // test için kısa süre
 
     const response = await Promise.race([
       fetch(url, {
@@ -59,7 +61,7 @@ export async function login(params: SignIn) {
           timeout
         )
       ),
-    ]);
+    ]);console.log("login responu konsole yazdırılıyor : ",response)
 
     if (!response.ok) {
       const errorData = await response.json();

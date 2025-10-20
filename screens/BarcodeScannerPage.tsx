@@ -128,7 +128,6 @@
 
 // export default BarCodeScanResult;
 
-
 // cloude 1. çözümü
 // import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 // import { useEffect, useState, useRef } from "react";
@@ -361,10 +360,14 @@ const BarCodeScanResult: React.FC<BarcodeScannerProps> = ({
   const bufferTimeout = 1500; // Buffer temizleme süresi (ms)
 
   const playBeep = async () => {
-    const { sound } = await Audio.Sound.createAsync(
-      require("../assets/beepsound.mp3")
-    );
-    await sound.playAsync();
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("../assets/beepsound.mp3")
+      );
+      await sound.playAsync();
+    } catch (error) {
+      console.log("Ses çalma hatası:", error);
+    }
   };
 
   // EAN13 checksum doğrulama
@@ -415,53 +418,76 @@ const BarCodeScanResult: React.FC<BarcodeScannerProps> = ({
     return /^[\x20-\x7E]+$/.test(code);
   };
 
-  // QR kod doğrulama
+  // QR kod doğrulama - daha esnek
   const validateQR = (code: string): boolean => {
-    if (code.length < 1) return false;
-    if (code.length > 4296) return false;
+    if (!code || code.length < 1) return false;
+    if (code.length > 4296) return false; // QR kod max boyut
     if (code.trim().length === 0) return false;
     return true;
   };
 
   // Genel barkod doğrulama
   const validateBarcode = (code: string, type?: string): boolean => {
-    console.log("Tarama tipi:", type, "Veri:", code, "Veri uzunluğu:", code.length);
-    
+    console.log("Tarama - Tip:", type, "Veri:", code, "Uzunluk:", code.length);
+
     // Boş veri kontrolü
     if (!code || code.trim().length === 0) {
-      console.log("Boş veri reddedildi");
+      console.log("❌ Boş veri reddedildi");
       return false;
     }
 
-    // QR kod özel kontrolü - Expo Go'da farklı type değerleri olabilir
-    const typeStr = type?.toLowerCase() || "";
-    if (typeStr.includes("qr") || type === "256" || type === "org.iso.QRCode") {
-      console.log("QR kod olarak algılandı");
+    // QR kod kontrolü - birden fazla format olabilir
+    const typeStr = (type || "").toLowerCase();
+    const isQR = typeStr.includes("qr") || 
+                 type === "256" || 
+                 type === "org.iso.QRCode" ||
+                 typeStr === "qrcode";
+
+    if (isQR) {
+      console.log("✅ QR kod algılandı");
       return validateQR(code);
     }
 
-    // Eğer veri çok kısaysa (1-5 karakter) muhtemelen QR veya özel formattır
-    // Checksum kontrolü yapma, direkt geçir
+    // Çok kısa veriler QR olabilir, checksum kontrolü yapma
     if (code.length < 6) {
-      console.log("Kısa veri, QR olabilir, geçiyor");
-      return true; // QR kodlar çok kısa olabilir
+      console.log("✅ Kısa veri (QR olabilir)");
+      return true;
     }
 
-    // Sürekli tekrar eden karakterleri reddet (sadece barkodlar için)
+    // Sadece barkodlar için tekrar eden karakter kontrolü
     if (/^(.)\1+$/.test(code) && code.length < 20) {
-      console.log("Tekrar eden karakter deseni reddedildi");
+      console.log("❌ Tekrar eden karakter deseni");
       return false;
     }
 
     // Barkod tipine göre doğrulama
-    if (code.length === 13 && /^\d+$/.test(code)) return validateEAN13(code);
-    if (code.length === 8 && /^\d+$/.test(code)) return validateEAN8(code);
-    if (code.length === 12 && /^\d+$/.test(code)) return validateUPCA(code);
-    if (typeStr.includes("code128")) return validateCode128(code);
+    if (code.length === 13 && /^\d+$/.test(code)) {
+      const valid = validateEAN13(code);
+      console.log(valid ? "✅ EAN13 geçerli" : "❌ EAN13 geçersiz");
+      return valid;
+    }
+    
+    if (code.length === 8 && /^\d+$/.test(code)) {
+      const valid = validateEAN8(code);
+      console.log(valid ? "✅ EAN8 geçerli" : "❌ EAN8 geçersiz");
+      return valid;
+    }
+    
+    if (code.length === 12 && /^\d+$/.test(code)) {
+      const valid = validateUPCA(code);
+      console.log(valid ? "✅ UPC-A geçerli" : "❌ UPC-A geçersiz");
+      return valid;
+    }
+    
+    if (typeStr.includes("code128")) {
+      const valid = validateCode128(code);
+      console.log(valid ? "✅ Code128 geçerli" : "❌ Code128 geçersiz");
+      return valid;
+    }
 
-    // Diğer formatlar için - daha esnek kontrol
-    console.log("Genel format olarak kabul edildi");
-    return true; // QR kodlar için esnek ol
+    // Diğer formatlar için esnek kabul et
+    console.log("✅ Genel format kabul edildi");
+    return true;
   };
 
   // Buffer temizleme
@@ -500,10 +526,11 @@ const BarCodeScanResult: React.FC<BarcodeScannerProps> = ({
   }) => {
     const now = Date.now();
 
-    console.log("Tarama algılandı - Tip:", type, "Veri:", data);
+    console.log("📷 Tarama algılandı - Tip:", type, "Veri:", data);
 
     // Cooldown kontrolü
     if (lastScanned && now - lastScanned < scanCooldown) {
+      console.log("⏳ Cooldown aktif");
       return;
     }
 
@@ -512,7 +539,7 @@ const BarCodeScanResult: React.FC<BarcodeScannerProps> = ({
 
     // Barkod doğrulama
     if (!validateBarcode(normalizedData, type)) {
-      console.log("Geçersiz kod reddedildi:", normalizedData, "Tip:", type);
+      console.log("❌ Kod doğrulanamadı");
       return;
     }
 
@@ -521,14 +548,14 @@ const BarCodeScanResult: React.FC<BarcodeScannerProps> = ({
 
     if (!existing) {
       scanBuffer.current.set(normalizedData, { count: 1, timestamp: now });
-      console.log("İlk okuma kaydedildi");
+      console.log("1️⃣ İlk okuma kaydedildi");
       return;
     }
 
     // Zaman aşımı kontrolü
     if (now - existing.timestamp > bufferTimeout) {
       scanBuffer.current.set(normalizedData, { count: 1, timestamp: now });
-      console.log("Zaman aşımı, okuma sıfırlandı");
+      console.log("🔄 Zaman aşımı, okuma sıfırlandı");
       return;
     }
 
@@ -539,15 +566,15 @@ const BarCodeScanResult: React.FC<BarcodeScannerProps> = ({
       timestamp: existing.timestamp,
     });
 
+    console.log(`📊 Okuma sayısı: ${newCount}/${requiredScans}`);
+
     // Yeterli okuma sayısına ulaşıldı mı?
     if (newCount >= requiredScans) {
       setLastScanned(now);
       scanBuffer.current.clear();
       await playBeep();
       onBarcodeScanned(normalizedData);
-      console.log("Kod başarıyla okundu:", normalizedData);
-    } else {
-      console.log(`Okuma sayısı: ${newCount}/${requiredScans}`);
+      console.log("✅ Kod başarıyla okundu:", normalizedData);
     }
   };
 
@@ -573,6 +600,12 @@ const BarCodeScanResult: React.FC<BarcodeScannerProps> = ({
             "upc_e",
             "code128",
             "code39",
+            "code93",
+            "codabar",
+            "itf14",
+            "pdf417",
+            "aztec",
+            "datamatrix"
           ],
         }}
       >
@@ -605,10 +638,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 9999,
   },
   message: {
     textAlign: "center",
     paddingBottom: 10,
+    zIndex: 9999,
   },
   camera: {
     width: "100%",
