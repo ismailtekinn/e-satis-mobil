@@ -5,21 +5,22 @@ import { SelectedCustomerProvider } from "../contex/selectedCustomerContex";
 import { AddCustomerFormProvider } from "../contex/customer/addCustomerFormContext";
 import { KullaniciProvider } from "../contex/kullaniciContext";
 import { AutoLoginProvider } from "../contex/settings/autoLoginContext";
+import { MenuProccesProvider } from "../contex/salesscreen/MenuProccesContext";
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AlertProvider>
-      {/* <BussinessProvider> */}
-      <KullaniciProvider>
-        <AutoLoginProvider>
-          <AddCustomerFormProvider>
-            <SelectedCustomerProvider>
-              <AppInner>{children}</AppInner>
-            </SelectedCustomerProvider>
-          </AddCustomerFormProvider>
-        </AutoLoginProvider>
-      </KullaniciProvider>
-      {/* </BussinessProvider> */}
+      <MenuProccesProvider>
+        <KullaniciProvider>
+          <AutoLoginProvider>
+            <AddCustomerFormProvider>
+              <SelectedCustomerProvider>
+                <AppInner>{children}</AppInner>
+              </SelectedCustomerProvider>
+            </AddCustomerFormProvider>
+          </AutoLoginProvider>
+        </KullaniciProvider>
+      </MenuProccesProvider>
     </AlertProvider>
   );
 };

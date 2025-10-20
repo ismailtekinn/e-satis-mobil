@@ -42,6 +42,9 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { useSelectedCustomer } from "../contex/selectedCustomerContex";
+import { PendingDocument } from "../types/documentsActionType";
+import { savePendingDocument } from "../services/screensServices/DocumentActionService";
+import { useMenuProcess } from "../contex/salesscreen/MenuProccesContext";
 
 export const sampleSalesDeneme: SaleItemDeneme[] = [
   new SaleItemDeneme({
@@ -181,6 +184,7 @@ const screenWidth = Dimensions.get("window").width;
 
 const SalesScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { selectedAction,setSelectedAction } = useMenuProcess();
 
   const PAGE_SIZE = 100;
   const [loading, setLoading] = useState(false);
@@ -228,28 +232,28 @@ const SalesScreen = () => {
   );
   const newSectionMaxHeight =
     screenHeight - searchBoxHeight - KEYBOARD_HEIGHT - screenHeight * 0.01;
-
   const closeSearchModal = () => {
-    setSearchProducts([]); // Arama sonuçlarını temizle
-    setSearchData({ Aranan: "", AramaTipi: 0 }); // Arama kutusunu temizle
+    setSearchProducts([]);
+    setSearchData({ Aranan: "", AramaTipi: 0 });
   };
-  // const handleSelectProduct = (item: SaleItemDeneme) => {
-  //   const newItem = { ...item, Stock: searchQuantity }; // burası kopya
-  //   setSelectedSales((prev) => {
-  //     const index = prev.findIndex((p) => p.Barcode === item.Barcode);
-  //     if (index !== -1) {
-  //       const updated = [...prev];
-  //       updated[index] = {
-  //         ...updated[index],
-  //         Stock: updated[index].Stock + searchQuantity,
-  //       };
-  //       return updated;
-  //     } else {
-  //       return [...prev, newItem];
-  //     }
-  //   });
-  //   setSearchText("");
-  // };
+
+  const pendingDoc: PendingDocument = {
+    customer: selectedCustomer,
+    products: selectedSale,
+    documentType: selectedFileType,
+    timestamp: new Date().toISOString(),
+  };
+  console.log("seçilen veriler console yazdırılıyor : ", pendingDoc);
+
+  const saveDoc = async () => {
+    try {
+      await savePendingDocument(pendingDoc);
+      alert("Belge beklemeye alındı!");
+    } catch (error) {
+      console.error("Belge kaydedilemedi:", error);
+      alert("Belge kaydedilemedi!");
+    }
+  };
   const handleSelectProduct = (item: SaleItemDeneme) => {
     const newItem = new SaleItemDeneme({
       ...item,
@@ -313,20 +317,18 @@ const SalesScreen = () => {
       console.error("Arama hatası: ", error);
     }
   };
-
-  // useEffect(() => {
-  //   if (selectedSale.length > 0) {
-  //     const lastIndex = selectedSale.length - 1;
-  //     setSelectedIndex(lastIndex); // Son eklenen öğeyi seçili yap
-  //     if (flatListRef.current) {
-  //       flatListRef.current.scrollToEnd({ animated: true }); // Scroll'u sonuna getir
-  //     }
-  //   }
-  // }, [selectedSale]);
-
   useEffect(() => {
     handleSearch();
   }, [searchData]);
+
+  useEffect(() => {
+    if (selectedAction === "SAVE_PENDING") {
+      saveDoc();
+      setSelectedAction(undefined); // tekrar tetiklememek için reset
+    } else {
+      console.log("Seçilen belge türüne dair bir atama bulunamadı")
+    }
+  }, [selectedAction]);
 
   useEffect(() => {
     if (selectedSale.length > 0) {

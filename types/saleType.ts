@@ -85,7 +85,7 @@ export class SaleItemDeneme {
   UtsEssizKimlikNo?: string;
 
   discount?: number;
-  arttırım?: number;
+  arttirim?: number;
   
   constructor(data: Omit<SaleItemDeneme, "Tutar">) {
     Object.assign(this, data);
