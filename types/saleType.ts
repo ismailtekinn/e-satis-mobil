@@ -38,7 +38,6 @@ export interface SaleEdit {
   SaleDate: Date;
   SaleID: number;
   Quantity: number;
-  // Stok_Quantity: number;
   TotalAmount: number;
   SaleType: string;
   UserID: number;
@@ -54,8 +53,6 @@ export class SaleItemDeneme {
   Currency!: string;
   Isconto?: string;
   isCanceled?: boolean;
-
-  // opsiyonel alanlar
   UrunId?: number;
   UrunTipi?: number;
   DepartmanNo?: number;
@@ -83,7 +80,6 @@ export class SaleItemDeneme {
   UtsSeriNo?: string;
   UtsUrunNo?: string;
   UtsEssizKimlikNo?: string;
-
   discount?: number;
   arttirim?: number;
   

@@ -43,7 +43,7 @@ export async function login(params: SignIn) {
     console.log("login mthodu çağrıldı ")
     const url = LOGIN_URL;
     // const url = "http://192.168.1.172:44342/KullaniciSorgula";
-    const timeout = 20000000; // test için kısa süre
+    const timeout = 2000; // test için kısa süre
 
     const response = await Promise.race([
       fetch(url, {

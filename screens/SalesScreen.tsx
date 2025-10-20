@@ -184,7 +184,7 @@ const screenWidth = Dimensions.get("window").width;
 
 const SalesScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const { selectedAction,setSelectedAction } = useMenuProcess();
+  const { selectedAction, setSelectedAction } = useMenuProcess();
 
   const PAGE_SIZE = 100;
   const [loading, setLoading] = useState(false);
@@ -224,12 +224,7 @@ const SalesScreen = () => {
   const { selectedFileType, setSelectedFileType } = useFileType();
   const { isDiscountApplied } = useSalesCancel();
   const KEYBOARD_HEIGHT = screenHeight * 0.3;
-  const ITEM_HEIGHT = 500;
-  const MAX_HEIGHT = 500;
-  const dynamicHeight = Math.min(
-    searchProducts.length * ITEM_HEIGHT,
-    MAX_HEIGHT
-  );
+
   const newSectionMaxHeight =
     screenHeight - searchBoxHeight - KEYBOARD_HEIGHT - screenHeight * 0.01;
   const closeSearchModal = () => {
@@ -243,7 +238,6 @@ const SalesScreen = () => {
     documentType: selectedFileType,
     timestamp: new Date().toISOString(),
   };
-  console.log("seçilen veriler console yazdırılıyor : ", pendingDoc);
 
   const saveDoc = async () => {
     try {
@@ -326,7 +320,7 @@ const SalesScreen = () => {
       saveDoc();
       setSelectedAction(undefined); // tekrar tetiklememek için reset
     } else {
-      console.log("Seçilen belge türüne dair bir atama bulunamadı")
+      console.log("Seçilen belge türüne dair bir atama bulunamadı");
     }
   }, [selectedAction]);
 
