@@ -10,14 +10,14 @@ import {
   Alert,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { SaleItemDeneme } from "../types/saleType";
+import { SaleItem } from "../types/saleType";
 import { useSalesCancel } from "../contex/salesCancelContext";
 import AlertModal from "./AlertModal";
 import { useAlert } from "../contex/AlertContext";
 
 type SalesScreenSearchAreaProps = {
-  searchProducts: SaleItemDeneme[];
-  handleSelectProduct: (item: SaleItemDeneme) => void;
+  searchProducts: SaleItem[];
+  handleSelectProduct: (item: SaleItem) => void;
   dynamicHeight: number;
   onCloseModal?: () => void;
   loading?: boolean; // Şu anda veri yükleniyor mu
@@ -40,10 +40,10 @@ const SalesScreenSearchArea: React.FC<SalesScreenSearchAreaProps> = ({
     alertMessage,
     setAlertMessage,
   } = useAlert();
-  const flatListRef = useRef<FlatList<SaleItemDeneme>>(null);
+  const flatListRef = useRef<FlatList<SaleItem>>(null);
   const [contentHeight, setContentHeight] = useState(0);
 
-  const renderItem: ListRenderItem<SaleItemDeneme> = ({ item }) => (
+  const renderItem: ListRenderItem<SaleItem> = ({ item }) => (
     <View style={styles.customerItem}>
       {/* Ürün adı - full width */}
       <View style={styles.productNameRow}>

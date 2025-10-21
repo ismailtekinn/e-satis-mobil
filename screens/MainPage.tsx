@@ -101,7 +101,6 @@ const MainPage = () => {
     else if (menuId === 3) {
       handleLogout()
     }
-    console.log(`${title} menüsüne tıklandı`);
   };
 
   const MenuCard: React.FC<MenuCardProps> = ({ item, index }) => {

@@ -21,7 +21,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BarCodeScanResult from "./BarcodeScannerPage";
 import { LinearGradient } from "expo-linear-gradient";
 import SalesCard from "../component/SalesCard";
-import { SaleItemDeneme, SaleProduct } from "../types/saleType";
+import { SaleItem, SaleProduct } from "../types/saleType";
 import SaleScreenModal from "../component/SaleScreenModal";
 // import CustomerSelectModal from "../component/CustomerSelectModal";
 import { SelectedCustomer } from "../types/customerType";
@@ -43,11 +43,14 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../types";
 import { useSelectedCustomer } from "../contex/selectedCustomerContex";
 import { PendingDocument } from "../types/documentsActionType";
-import { savePendingDocument } from "../services/screensServices/DocumentActionService";
+import {
+  listPendingDocuments,
+  savePendingDocument,
+} from "../services/screensServices/DocumentActionService";
 import { useMenuProcess } from "../contex/salesscreen/MenuProccesContext";
 
-export const sampleSalesDeneme: SaleItemDeneme[] = [
-  new SaleItemDeneme({
+export const sampleSalesDeneme: SaleItem[] = [
+  new SaleItem({
     Index: 1,
     ProductName: "KATILIM PAYI",
     Barcode: 2222,
@@ -57,7 +60,7 @@ export const sampleSalesDeneme: SaleItemDeneme[] = [
     Rayon: "Reyon 1",
     Currency: "TL",
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 2,
     ProductName: "FİYAT FARKI",
     Barcode: 3333,
@@ -67,7 +70,7 @@ export const sampleSalesDeneme: SaleItemDeneme[] = [
     Rayon: "Reyon 2",
     Currency: "TL",
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 3,
     ProductName: "İLAÇ %1",
     Barcode: 7777,
@@ -78,8 +81,8 @@ export const sampleSalesDeneme: SaleItemDeneme[] = [
     Currency: "TL",
   }),
 ];
-export const sampleProductsDeneme: SaleItemDeneme[] = [
-  new SaleItemDeneme({
+export const sampleProductsDeneme: SaleItem[] = [
+  new SaleItem({
     Index: 1,
     ProductName: "Parol 500mg 20 Tablet",
     Barcode: 1234567890123,
@@ -93,7 +96,7 @@ export const sampleProductsDeneme: SaleItemDeneme[] = [
     IndOran: 0,
     IndTutar: 0,
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 2,
     ProductName: "Augmentin 1000mg 14 Tablet",
     Barcode: 2345678901234,
@@ -107,7 +110,7 @@ export const sampleProductsDeneme: SaleItemDeneme[] = [
     IndOran: 0,
     IndTutar: 0,
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 3,
     ProductName: "Aspirin Protect 100mg 30 Tablet",
     Barcode: 3456789012345,
@@ -121,7 +124,7 @@ export const sampleProductsDeneme: SaleItemDeneme[] = [
     IndOran: 0,
     IndTutar: 0,
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 4,
     ProductName: "Majezik 100mg 15 Tablet",
     Barcode: 4567890123456,
@@ -135,7 +138,7 @@ export const sampleProductsDeneme: SaleItemDeneme[] = [
     IndOran: 0,
     IndTutar: 0,
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 5,
     ProductName: "Doloril 500mg 10 Tablet",
     Barcode: 5678901234567,
@@ -149,7 +152,7 @@ export const sampleProductsDeneme: SaleItemDeneme[] = [
     IndOran: 0,
     IndTutar: 0,
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 6,
     ProductName: "Panadol Extra 500mg 16 Tablet",
     Barcode: 6789012345678,
@@ -163,7 +166,7 @@ export const sampleProductsDeneme: SaleItemDeneme[] = [
     IndOran: 0,
     IndTutar: 0,
   }),
-  new SaleItemDeneme({
+  new SaleItem({
     Index: 7,
     ProductName: "Nurofen 200mg 12 Tablet",
     Barcode: 7890123456789,
@@ -199,7 +202,7 @@ const SalesScreen = () => {
   });
   const [searchQuantity, setSearchQuantity] = useState<number>(1);
   // const [searchProducts, setSearchProducts] = useState(sampleProductsDeneme);
-  const [searchProducts, setSearchProducts] = useState<SaleItemDeneme[]>([]);
+  const [searchProducts, setSearchProducts] = useState<SaleItem[]>([]);
 
   const [isScannerVisible, setIsScannerVisible] = useState(false);
   const [isMenuModalVisible, setIsMenuModalVisible] = useState(false);
@@ -248,8 +251,19 @@ const SalesScreen = () => {
       alert("Belge kaydedilemedi!");
     }
   };
-  const handleSelectProduct = (item: SaleItemDeneme) => {
-    const newItem = new SaleItemDeneme({
+  const listDoc = async () => {
+    try {
+      const listDoc = await listPendingDocuments();
+      console.log(
+        "beklemeye alınan json verisi console yazdırılıyor: ",
+        listDoc
+      );
+    } catch (error) {
+      console.log("belgeler getirilemedi :", error);
+    }
+  };
+  const handleSelectProduct = (item: SaleItem) => {
+    const newItem = new SaleItem({
       ...item,
       Stock: searchQuantity, // sepete eklenen miktar
     });
@@ -283,9 +297,9 @@ const SalesScreen = () => {
         setLoading(false);
       }
       const startIndex = searchProducts.length;
-      const saleItems: SaleItemDeneme[] = response.map(
+      const saleItems: SaleItem[] = response.map(
         (item, index) =>
-          new SaleItemDeneme({
+          new SaleItem({
             Index: startIndex + index + 1,
             ProductName: item.MAL_ADI,
             Barcode: Number(item.BARKOD),
@@ -319,8 +333,11 @@ const SalesScreen = () => {
     if (selectedAction === "SAVE_PENDING") {
       saveDoc();
       setSelectedAction(undefined); // tekrar tetiklememek için reset
+    } else if (selectedAction === "LOAD_PENDING") {
+      listPendingDocuments();
+      setSelectedAction(undefined); // tekrar tetiklememek için reset
     } else {
-      console.log("Seçilen belge türüne dair bir atama bulunamadı");
+      setSelectedAction(undefined); 
     }
   }, [selectedAction]);
 

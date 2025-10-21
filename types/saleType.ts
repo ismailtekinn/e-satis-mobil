@@ -42,7 +42,7 @@ export interface SaleEdit {
   SaleType: string;
   UserID: number;
 }
-export class SaleItemDeneme {
+export class SaleItem {
   Index!: number;
   ProductName!: string;
   Barcode!: number;
@@ -82,13 +82,43 @@ export class SaleItemDeneme {
   UtsEssizKimlikNo?: string;
   discount?: number;
   arttirim?: number;
-  
-  constructor(data: Omit<SaleItemDeneme, "Tutar">) {
+
+  constructor(data: Omit<SaleItem, "Tutar">) {
     Object.assign(this, data);
     this.Tutar = (data.Price ?? 0) * (data.Stock ?? 0); // direkt hesapla ve ata
   }
 }
 
+export class SaleItemDeneme {
+  ID?: string;
+  MAL_KODU?: string;
+  MAL_ADI?: string;
+  SON_ALIS_FIYATI?: string;
+  SATIS_KDV?: string;
+  BARKOD?: string;
+  GRUP_KODU?: string;
+  GRUP_ADI?: string;
+  SATIS_FIYATI_1?: string;
+  SATIS_FIYATI_2?: string;
+  SATIS_FIYATI_3?: string;
+  KAMU_ISKONTO_ORANI?: string;
+  PUAN?: string;
+  MARKA_NO?: string;
+  MARKA_ADI?: string;
+  KATAGORI_NO?: string;
+  KATAGORI_ADI?: string;
+  Toplam: number;
+  REYON_KODU?: string;
+  REYON_ADI?: string;
+  BAKIYE?: string;
+  UTS_STATUS?: string;
+
+  constructor(data: Omit<SaleItemDeneme, "Toplam">) {
+    Object.assign(this, data);
+    this.Toplam =
+      (Number(data.SATIS_FIYATI_1) || 0) * (Number(data.BAKIYE) || 0);
+  }
+}
 export type SaleProduct = {
   Barcode: string;
   ProductName: string;

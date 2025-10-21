@@ -37,13 +37,13 @@ export default function ActionModalExample({ onClose }: Props) {
     },
     {
       title: "Belgeyi Beklemeye Al",
-      action: () => setSelectedAction("LOAD_PENDING"),
+      action: () => setSelectedAction("SAVE_PENDING"),
       icon: "pause-outline",
        color: "#F7B731",
     },
     {
       title: "Bekleyen Belgeyi Getir",
-      action: () => console.log("Bekleyen Belgeyi Getir"),
+      action: () => setSelectedAction("LOAD_PENDING"),
       icon: "download-outline",
        color: "#34C759",
     },

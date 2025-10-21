@@ -7,7 +7,7 @@ import {
   Dimensions,
   Alert,
 } from "react-native";
-import { SaleItemDeneme } from "../types/saleType";
+import { SaleItem } from "../types/saleType";
 import { Swipeable } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -16,7 +16,7 @@ import { useSales } from "../contex/SalesContext";
 import { useSalesCancel } from "../contex/salesCancelContext";
 import { useAlert } from "../contex/AlertContext";
 type Props = {
-  product: SaleItemDeneme;
+  product: SaleItem;
   onPress?: () => void;
   orderNumber: number;
   onCountChange?: (itemIndex: number, newCount: number) => void;
@@ -174,7 +174,7 @@ const SalesCard: React.FC<Props> = ({
             });
             setSelectedSales(
               selectedSale.map((p) =>
-                p.Barcode === product.Barcode ? new SaleItemDeneme({ ...p }) : p
+                p.Barcode === product.Barcode ? new SaleItem({ ...p }) : p
               )
             );
             setModalVisible(true);

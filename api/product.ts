@@ -183,7 +183,6 @@ export async function searchProduct( // Fonksiyon tanımı
       ""
     ); // Kontrol karakter temizle
     const parsedData: SQLDataParsed = JSON.parse(cleanSQLData); // JSON parse et
-    console.log("Toplam kayıt sayısı:", parsedData.RECORD_COUNT);
     return parsedData.DATA; // DATA dizisini dön
   } catch (error) {
     // Hata yakalama

@@ -14,9 +14,7 @@ const ensurePendingDocsDirExists = async () => {
 
 export const savePendingDocument = async (doc: PendingDocument) => {
   try {
-    // 1. Klasörü hazırla
     await ensurePendingDocsDirExists();
-
     // 2. Dosya adı oluştur
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const customerId = doc.customer?.id ?? "unknown";
@@ -36,8 +34,9 @@ export const savePendingDocument = async (doc: PendingDocument) => {
 
 export const listPendingDocuments = async () => {
   try {
+    console.log("bekleyen belgeyi getirme fonksiyonu çağrıldı")
     const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory + "pendingDocuments/");
-    console.log("Bekleyen belgeler:", files);
+    console.log("getirilen veri console yazdırılıyor: ", files)
     return files;
   } catch (error) {
     console.error("Klasör okunamadı:", error);

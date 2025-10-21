@@ -8,7 +8,7 @@ import React, {
 } from "react";
 
 // Type’ı senin dosyadan import edebilirsin
-import { SaleItemDeneme } from "../types/saleType";
+import { SaleItem } from "../types/saleType";
 
 export type ActionType = "edit" | "delete" | "etiket" | "isconto" | null;
 
@@ -27,8 +27,8 @@ export type SummaryState = {
 };
 
 type SalesContextType = {
-  selectedSale: SaleItemDeneme[];
-  setSelectedSales: React.Dispatch<React.SetStateAction<SaleItemDeneme[]>>;
+  selectedSale: SaleItem[];
+  setSelectedSales: React.Dispatch<React.SetStateAction<SaleItem[]>>;
   summary: SummaryState;
   setSummary: React.Dispatch<React.SetStateAction<SummaryState>>;
 };
@@ -36,7 +36,7 @@ type SalesContextType = {
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
 
 export const SalesProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedSale, setSelectedSales] = useState<SaleItemDeneme[]>([]); // başlangıç boş array
+  const [selectedSale, setSelectedSales] = useState<SaleItem[]>([]); // başlangıç boş array
   const [summary, setSummary] = useState<SummaryState>({
     totalItems: 0,
     totalStock: 0,
