@@ -21,7 +21,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BarCodeScanResult from "./BarcodeScannerPage";
 import { LinearGradient } from "expo-linear-gradient";
 import SalesCard from "../component/SalesCard";
-import { SaleItem, SaleProduct } from "../types/saleType";
+import { ProductsJson, SaleItem, SaleProduct } from "../types/saleType";
 import SaleScreenModal from "../component/SaleScreenModal";
 // import CustomerSelectModal from "../component/CustomerSelectModal";
 import { SelectedCustomer } from "../types/customerType";
@@ -45,12 +45,15 @@ import { useSelectedCustomer } from "../contex/selectedCustomerContex";
 import { PendingDocument } from "../types/documentsActionType";
 import {
   clearPendingDocuments,
+  findProductByBarcode,
   getPendingDocumentContent,
   listPendingDocuments,
   savePendingDocument,
   sharePendingDocument,
 } from "../services/screensServices/DocumentActionService";
 import { useMenuProcess } from "../contex/salesscreen/MenuProccesContext";
+
+import productsDataJson from "../assets/products_20000.json";
 
 // export const sampleSalesDeneme: SaleItem[] = [
 //   new SaleItem({
@@ -238,20 +241,42 @@ const SalesScreen = () => {
     setSearchData({ Aranan: "", AramaTipi: 0 });
   };
 
+  // const pendingDoc: PendingDocument = {
+  //   customer: selectedCustomer,
+  //   products: selectedSale,
+  //   documentType: selectedFileType,
+  //   timestamp: new Date().toISOString(),
+  // };
+
+  const data = productsDataJson as ProductsJson; // tip ataması
+
   const pendingDoc: PendingDocument = {
     customer: selectedCustomer,
-    products: selectedSale,
+    products: data.products,
     documentType: selectedFileType,
     timestamp: new Date().toISOString(),
   };
-
   const saveDoc = async () => {
     try {
+      // console.log("json dosyasından okunan değerler konsole yazdırılıyor:",pendingDoc)
       await savePendingDocument(pendingDoc);
       alert("Belge beklemeye alındı!");
     } catch (error) {
       console.error("Belge kaydedilemedi:", error);
       alert("Belge kaydedilemedi!");
+    }
+  };
+  const searchDocument = async () => {
+    try {
+      const aranan = 1000000000001;
+      const result = await findProductByBarcode(aranan);
+      const saleItems: SaleItem[] = [result as SaleItem];
+
+      setSearchProducts((prev) =>
+        currentPage === 0 ? saleItems : [...prev, ...saleItems]
+      );
+    } catch (error) {
+      console.log("Aranan ürün bulunamadı: ", error);
     }
   };
   const listAndReadDocs = async () => {
@@ -268,14 +293,13 @@ const SalesScreen = () => {
           VatRate: product.VatRate,
           Rayon: product.Rayon,
           Currency: product.Currency,
-          UrunId: product.UrunId,
           Tutar: product.Tutar,
         }));
 
         setSelectedSales((prev) => [...prev, ...newItems]); // direkt ekle
       }
     }
-    await clearPendingDocuments()
+    await clearPendingDocuments();
   };
   // Ürün seçme methodu
   const handleSelectProduct = (item: SaleItem) => {
@@ -342,7 +366,8 @@ const SalesScreen = () => {
   };
 
   useEffect(() => {
-    handleSearch();
+    // handleSearch();
+    searchDocument();
   }, [searchData]);
 
   useEffect(() => {
@@ -423,7 +448,8 @@ const SalesScreen = () => {
             //   setCustomerModalVisible(true);
             //   navigation.navigate("CustomerSearchScreen");
             // }}
-            onPress={() => navigation.navigate("CustomerSearchScreen")}
+            // onPress={() => navigation.navigate("CustomerSearchScreen")}
+            onPress={() => searchDocument()}
           >
             <Text style={styles.selectCustomerBtnText}>Müşteri Seç</Text>
           </TouchableOpacity>
@@ -498,7 +524,7 @@ const SalesScreen = () => {
                   onCloseModal={closeSearchModal}
                   loading={loading}
                   hasMore={hasMore}
-                  onLoadMore={handleSearch}
+                  // onLoadMore={handleSearch}
                 />
 
                 {loading && (

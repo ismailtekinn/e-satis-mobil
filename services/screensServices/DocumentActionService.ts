@@ -2,6 +2,7 @@ import * as FileSystem from "expo-file-system";
 import { PendingDocument } from "../../types/documentsActionType";
 
 import * as Sharing from "expo-sharing";
+import { SaleItem } from "../../types/saleType";
 
 const PENDING_DOCS_DIR = FileSystem.documentDirectory + "pendingDocuments/";
 
@@ -50,13 +51,59 @@ export const listPendingDocuments = async () => {
     const files = await FileSystem.readDirectoryAsync(
       FileSystem.documentDirectory + "pendingDocuments/"
     );
+    console.log(
+      "dökümanlar list methodunun içinde console yazdırılıyor:",
+      files
+    );
     return files;
   } catch (error) {
     console.error("Klasör okunamadı:", error);
     return [];
   }
 };
+const productCache = new Map<number, SaleItem>();
+let isCacheInitialized = false;
 
+export const findProductByBarcode = async (barcode: number) => {
+  try {
+    console.log("barcode numarası console yazdırılıyor :", barcode);
+
+    if (!isCacheInitialized) {
+      const files = await listPendingDocuments();
+
+      for (const file of files) {
+        const content = await getPendingDocumentContent(file);
+        if (content?.products && Array.isArray(content.products)) {
+          for (const product of content.products) {
+            const key = Number(product.Barcode);
+            if (!isNaN(key)) {
+              productCache.set(key, product);
+            }
+          }
+        }
+      }
+
+      isCacheInitialized = true;
+      console.log(
+        "Product cache initialized with",
+        productCache.size,
+        "products"
+      );
+    }
+
+    const result = productCache.get(barcode);
+    if (!result) {
+      console.warn("Aranan ürün cache'de bulunamadı:", barcode);
+    }
+
+    return result ?? null;
+  } catch (error) {
+    console.error("Ürün arama hatası:", error);
+    return null;
+  }
+};
+
+// dosyayı silme methodu
 export const clearPendingDocuments = async () => {
   const dir = FileSystem.documentDirectory + "pendingDocuments/";
   try {
@@ -70,6 +117,7 @@ export const clearPendingDocuments = async () => {
   }
 };
 
+// dosyayı paylaşma methodu
 export const sharePendingDocument = async () => {
   try {
     console.log("bekleyen belgeyi paylaşma fonksiyonu çağrıldı");

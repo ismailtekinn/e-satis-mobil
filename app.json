@@ -9,16 +9,19 @@
       "resizeMode": "cover",
       "backgroundColor": "#fafbfb"
     },
-    "ios": {    "splash": {
-      "image": "./assets/e-market.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#fafbfb"
-    },
+    "ios": {
+      "splash": {
+        "image": "./assets/e-market.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#fafbfb"
+      },
       "supportsTablet": true
     },
     "android": {
       "package": "com.bybrstekin.emarket",
-      "permissions": ["INTERNET"],
+      "permissions": [
+        "INTERNET"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/triaslide.png",
         "backgroundColor": "#ffffff"
@@ -27,12 +30,24 @@
         {
           "action": "VIEW",
           "data": [
-            { "scheme": "tel" },
-            { "scheme": "mailto" },
-            { "scheme": "whatsapp" },
-            { "scheme": "https", "host": "wa.me" }
+            {
+              "scheme": "tel"
+            },
+            {
+              "scheme": "mailto"
+            },
+            {
+              "scheme": "whatsapp"
+            },
+            {
+              "scheme": "https",
+              "host": "wa.me"
+            }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -54,7 +69,8 @@
           "recordAudioAndroid": true
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-sqlite"
     ]
   }
 }

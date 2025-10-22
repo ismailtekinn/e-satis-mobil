@@ -127,3 +127,23 @@ export type SaleProduct = {
   Shelf: string;
   Price: number;
 };
+
+
+export type ProductJsonItem = {
+  Index: number;
+  ProductName: string;
+  Barcode: number;
+  Stock: number;
+  Price: number;
+  VatRate: number;
+  Rayon: string;
+  Currency: string;
+  UrunId: number;
+  Tutar: number;
+};
+
+export type ProductsJson = {
+  products: ProductJsonItem[];
+  documentType: string;
+  timestamp: string;
+};
