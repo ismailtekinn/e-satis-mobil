@@ -44,143 +44,146 @@ import { RootStackParamList } from "../types";
 import { useSelectedCustomer } from "../contex/selectedCustomerContex";
 import { PendingDocument } from "../types/documentsActionType";
 import {
+  clearPendingDocuments,
+  getPendingDocumentContent,
   listPendingDocuments,
   savePendingDocument,
+  sharePendingDocument,
 } from "../services/screensServices/DocumentActionService";
 import { useMenuProcess } from "../contex/salesscreen/MenuProccesContext";
 
-export const sampleSalesDeneme: SaleItem[] = [
-  new SaleItem({
-    Index: 1,
-    ProductName: "KATILIM PAYI",
-    Barcode: 2222,
-    Stock: 1,
-    Price: 0.01,
-    VatRate: 10,
-    Rayon: "Reyon 1",
-    Currency: "TL",
-  }),
-  new SaleItem({
-    Index: 2,
-    ProductName: "FİYAT FARKI",
-    Barcode: 3333,
-    Stock: 1,
-    Price: 0.01,
-    VatRate: 10,
-    Rayon: "Reyon 2",
-    Currency: "TL",
-  }),
-  new SaleItem({
-    Index: 3,
-    ProductName: "İLAÇ %1",
-    Barcode: 7777,
-    Stock: 1,
-    Price: 0.01,
-    VatRate: 1,
-    Rayon: "Reyon 3",
-    Currency: "TL",
-  }),
-];
-export const sampleProductsDeneme: SaleItem[] = [
-  new SaleItem({
-    Index: 1,
-    ProductName: "Parol 500mg 20 Tablet",
-    Barcode: 1234567890123,
-    Stock: 25,
-    Price: 14900.99,
-    VatRate: 18,
-    Rayon: "Reyon 1",
-    Currency: "TL",
-    Isconto: "",
-    IndFlag: 0,
-    IndOran: 0,
-    IndTutar: 0,
-  }),
-  new SaleItem({
-    Index: 2,
-    ProductName: "Augmentin 1000mg 14 Tablet",
-    Barcode: 2345678901234,
-    Stock: 12,
-    Price: 790000.5,
-    VatRate: 8,
-    Rayon: "Reyon 2",
-    Currency: "TL",
-    Isconto: "",
-    IndFlag: 0,
-    IndOran: 0,
-    IndTutar: 0,
-  }),
-  new SaleItem({
-    Index: 3,
-    ProductName: "Aspirin Protect 100mg 30 Tablet",
-    Barcode: 3456789012345,
-    Stock: 7,
-    Price: 120.0,
-    VatRate: 1,
-    Rayon: "Reyon 3",
-    Currency: "TL",
-    Isconto: "",
-    IndFlag: 0,
-    IndOran: 0,
-    IndTutar: 0,
-  }),
-  new SaleItem({
-    Index: 4,
-    ProductName: "Majezik 100mg 15 Tablet",
-    Barcode: 4567890123456,
-    Stock: 30,
-    Price: 35.75,
-    VatRate: 18,
-    Rayon: "Reyon 1",
-    Currency: "TL",
-    Isconto: "",
-    IndFlag: 0,
-    IndOran: 0,
-    IndTutar: 0,
-  }),
-  new SaleItem({
-    Index: 5,
-    ProductName: "Doloril 500mg 10 Tablet",
-    Barcode: 5678901234567,
-    Stock: 20,
-    Price: 55.0,
-    VatRate: 8,
-    Rayon: "Reyon 4",
-    Currency: "TL",
-    Isconto: "",
-    IndFlag: 0,
-    IndOran: 0,
-    IndTutar: 0,
-  }),
-  new SaleItem({
-    Index: 6,
-    ProductName: "Panadol Extra 500mg 16 Tablet",
-    Barcode: 6789012345678,
-    Stock: 15,
-    Price: 72.5,
-    VatRate: 8,
-    Rayon: "Reyon 5",
-    Currency: "TL",
-    Isconto: "",
-    IndFlag: 0,
-    IndOran: 0,
-    IndTutar: 0,
-  }),
-  new SaleItem({
-    Index: 7,
-    ProductName: "Nurofen 200mg 12 Tablet",
-    Barcode: 7890123456789,
-    Stock: 10,
-    Price: 48.0,
-    VatRate: 8,
-    Rayon: "Reyon 6",
-    Currency: "TL",
-    Isconto: "",
-    IndFlag: 0,
-    IndOran: 0,
-    IndTutar: 0,
-  }),
-];
+// export const sampleSalesDeneme: SaleItem[] = [
+//   new SaleItem({
+//     Index: 1,
+//     ProductName: "KATILIM PAYI",
+//     Barcode: 2222,
+//     Stock: 1,
+//     Price: 0.01,
+//     VatRate: 10,
+//     Rayon: "Reyon 1",
+//     Currency: "TL",
+//   }),
+//   new SaleItem({
+//     Index: 2,
+//     ProductName: "FİYAT FARKI",
+//     Barcode: 3333,
+//     Stock: 1,
+//     Price: 0.01,
+//     VatRate: 10,
+//     Rayon: "Reyon 2",
+//     Currency: "TL",
+//   }),
+//   new SaleItem({
+//     Index: 3,
+//     ProductName: "İLAÇ %1",
+//     Barcode: 7777,
+//     Stock: 1,
+//     Price: 0.01,
+//     VatRate: 1,
+//     Rayon: "Reyon 3",
+//     Currency: "TL",
+//   }),
+// ];
+// export const sampleProductsDeneme: SaleItem[] = [
+//   new SaleItem({
+//     Index: 1,
+//     ProductName: "Parol 500mg 20 Tablet",
+//     Barcode: 1234567890123,
+//     Stock: 25,
+//     Price: 14900.99,
+//     VatRate: 18,
+//     Rayon: "Reyon 1",
+//     Currency: "TL",
+//     Isconto: "",
+//     IndFlag: 0,
+//     IndOran: 0,
+//     IndTutar: 0,
+//   }),
+//   new SaleItem({
+//     Index: 2,
+//     ProductName: "Augmentin 1000mg 14 Tablet",
+//     Barcode: 2345678901234,
+//     Stock: 12,
+//     Price: 790000.5,
+//     VatRate: 8,
+//     Rayon: "Reyon 2",
+//     Currency: "TL",
+//     Isconto: "",
+//     IndFlag: 0,
+//     IndOran: 0,
+//     IndTutar: 0,
+//   }),
+//   new SaleItem({
+//     Index: 3,
+//     ProductName: "Aspirin Protect 100mg 30 Tablet",
+//     Barcode: 3456789012345,
+//     Stock: 7,
+//     Price: 120.0,
+//     VatRate: 1,
+//     Rayon: "Reyon 3",
+//     Currency: "TL",
+//     Isconto: "",
+//     IndFlag: 0,
+//     IndOran: 0,
+//     IndTutar: 0,
+//   }),
+//   new SaleItem({
+//     Index: 4,
+//     ProductName: "Majezik 100mg 15 Tablet",
+//     Barcode: 4567890123456,
+//     Stock: 30,
+//     Price: 35.75,
+//     VatRate: 18,
+//     Rayon: "Reyon 1",
+//     Currency: "TL",
+//     Isconto: "",
+//     IndFlag: 0,
+//     IndOran: 0,
+//     IndTutar: 0,
+//   }),
+//   new SaleItem({
+//     Index: 5,
+//     ProductName: "Doloril 500mg 10 Tablet",
+//     Barcode: 5678901234567,
+//     Stock: 20,
+//     Price: 55.0,
+//     VatRate: 8,
+//     Rayon: "Reyon 4",
+//     Currency: "TL",
+//     Isconto: "",
+//     IndFlag: 0,
+//     IndOran: 0,
+//     IndTutar: 0,
+//   }),
+//   new SaleItem({
+//     Index: 6,
+//     ProductName: "Panadol Extra 500mg 16 Tablet",
+//     Barcode: 6789012345678,
+//     Stock: 15,
+//     Price: 72.5,
+//     VatRate: 8,
+//     Rayon: "Reyon 5",
+//     Currency: "TL",
+//     Isconto: "",
+//     IndFlag: 0,
+//     IndOran: 0,
+//     IndTutar: 0,
+//   }),
+//   new SaleItem({
+//     Index: 7,
+//     ProductName: "Nurofen 200mg 12 Tablet",
+//     Barcode: 7890123456789,
+//     Stock: 10,
+//     Price: 48.0,
+//     VatRate: 8,
+//     Rayon: "Reyon 6",
+//     Currency: "TL",
+//     Isconto: "",
+//     IndFlag: 0,
+//     IndOran: 0,
+//     IndTutar: 0,
+//   }),
+// ];
 
 const screenHeight = Dimensions.get("window").height;
 const screenWidth = Dimensions.get("window").width;
@@ -251,17 +254,30 @@ const SalesScreen = () => {
       alert("Belge kaydedilemedi!");
     }
   };
-  const listDoc = async () => {
-    try {
-      const listDoc = await listPendingDocuments();
-      console.log(
-        "beklemeye alınan json verisi console yazdırılıyor: ",
-        listDoc
-      );
-    } catch (error) {
-      console.log("belgeler getirilemedi :", error);
+  const listAndReadDocs = async () => {
+    const files = await listPendingDocuments(); // dosya isimlerini al
+    for (const file of files) {
+      const content = await getPendingDocumentContent(file);
+      if (content?.products) {
+        const newItems = content.products.map((product: any) => ({
+          Index: product.Index,
+          ProductName: product.ProductName,
+          Barcode: product.Barcode,
+          Stock: product.Stock,
+          Price: product.Price,
+          VatRate: product.VatRate,
+          Rayon: product.Rayon,
+          Currency: product.Currency,
+          UrunId: product.UrunId,
+          Tutar: product.Tutar,
+        }));
+
+        setSelectedSales((prev) => [...prev, ...newItems]); // direkt ekle
+      }
     }
+    await clearPendingDocuments()
   };
+  // Ürün seçme methodu
   const handleSelectProduct = (item: SaleItem) => {
     const newItem = new SaleItem({
       ...item,
@@ -270,7 +286,7 @@ const SalesScreen = () => {
     setSelectedSales((prev) => [...prev, newItem]); // her zaman yeni satır eklenir
     setSearchText(""); // arama kutusunu temizle
   };
-
+  // Ürün arama methodu
   const handleSearch = async () => {
     try {
       setLoading(true);
@@ -304,7 +320,6 @@ const SalesScreen = () => {
             ProductName: item.MAL_ADI,
             Barcode: Number(item.BARKOD),
             Stock: Math.abs(Number(item.BAKIYE)),
-            // Stock: searchQuantity,
             Price: Number(item.SATIS_FIYATI_1.replace(",", ".")),
             VatRate: Number(item.SATIS_KDV),
             Rayon: item.REYON_ADI,
@@ -325,20 +340,29 @@ const SalesScreen = () => {
       console.error("Arama hatası: ", error);
     }
   };
+
   useEffect(() => {
     handleSearch();
   }, [searchData]);
 
   useEffect(() => {
-    if (selectedAction === "SAVE_PENDING") {
-      saveDoc();
-      setSelectedAction(undefined); // tekrar tetiklememek için reset
-    } else if (selectedAction === "LOAD_PENDING") {
-      listPendingDocuments();
-      setSelectedAction(undefined); // tekrar tetiklememek için reset
-    } else {
-      setSelectedAction(undefined); 
-    }
+    const handleAction = async () => {
+      if (selectedAction === "SAVE_PENDING") {
+        await saveDoc(); // belgeyi kaydet
+        setSelectedSales([]); // seçili ürünleri temizle
+        setSelectedAction(undefined); // tekrar tetiklememek için reset
+      } else if (selectedAction === "LOAD_PENDING") {
+        await listAndReadDocs(); // bekleyen belgeleri yükle
+        setSelectedAction(undefined);
+      } else if (selectedAction === "SHARE_DOCUMENT") {
+        await sharePendingDocument(); // belgeyi paylaş
+        setSelectedAction(undefined);
+      } else {
+        setSelectedAction(undefined);
+      }
+    };
+
+    handleAction();
   }, [selectedAction]);
 
   useEffect(() => {

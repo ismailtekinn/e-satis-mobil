@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import SettingScreenDropDownModel from "../component/SettingScreenDropDownModel";
 import { AutoLoginOption } from "../types/enums/settings";
 import { useAutoLogin } from "../contex/settings/autoLoginContext";
+import AlertModal from "../component/AlertModal";
 
 const { width } = Dimensions.get("window");
 
@@ -30,6 +31,9 @@ const SettingsScreen = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [dropDownMolalVisible, setDropDownModalVisible] = useState(false);
   const { autoLogin, setAutoLogin } = useAutoLogin();
+  const [alertModalVisible, setAlertModalVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+    const [allertTtile, setAlertTitle] = useState("");
 
   const [selectedValue, setSelectedValue] = useState<AutoLoginOption>(
     AutoLoginOption.Hayir
@@ -70,7 +74,9 @@ const SettingsScreen = () => {
   ];
 
   const handleSave = () => {
-    Alert.alert("Başarılı", "Ayarlar kaydedildi!");
+    setAlertTitle("Başarılı")
+    setAlertModalVisible(true)
+    setAlertMessage("Ayarlar kaydedildi!")
   };
 
   const testConnection = () => {
@@ -237,7 +243,7 @@ const SettingsScreen = () => {
               <View style={styles.fieldHalf}>
                 <Text style={styles.label}>Yazıcı Portu</Text>
                 <TextInput
-                  style={[styles.input,{maxHeight: 55,}]}
+                  style={[styles.input, { maxHeight: 55 }]}
                   placeholder="Yazıcı Portunu"
                   placeholderTextColor="#999"
                 />
@@ -252,7 +258,6 @@ const SettingsScreen = () => {
                       backgroundColor: "#007AFF",
                       color: "white",
                       textAlign: "center",
-      
                     },
                   ]}
                   value={"Yazıcıyı Test Et"}
@@ -478,6 +483,12 @@ const SettingsScreen = () => {
       </ScrollView>
 
       <ScrollView style={styles.content}>{renderTabContent()}</ScrollView>
+      <AlertModal
+        visible={alertModalVisible}
+        message={alertMessage}
+        title={allertTtile}
+        onClose={() => setAlertModalVisible(false)}
+      />
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
